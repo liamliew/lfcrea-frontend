@@ -7,4 +7,10 @@ export default defineConfig({
   server: {
     allowedHosts: ['ide5.triage.lt', 'lfcrea.com']
   }
+  optimizeDeps: {
+    include: [
+      '@opentelemetry/resources',
+      '@opentelemetry/sdk-trace-web',
+    ]
+  }
 })
