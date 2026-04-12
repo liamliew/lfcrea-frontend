@@ -1,8 +1,8 @@
 import { WebTracerProvider, BatchSpanProcessor } from '@opentelemetry/sdk-trace-web';
 import { getWebAutoInstrumentations } from '@opentelemetry/auto-instrumentations-web';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
-import { Resource } from "@opentelemetry/resources";
-import { ATTR_SERVICE_NAME } from "@opentelemetry/semantic-conventions";
+import { resourceFromAttributes } from '@opentelemetry/resources';
+import { ATTR_SERVICE_NAME } from '@opentelemetry/semantic-conventions';
 import { registerInstrumentations } from '@opentelemetry/instrumentation';
 
 const signozEndpoint = import.meta.env.VITE_SIGNOZ_ENDPOINT;
@@ -18,8 +18,8 @@ if (signozEndpoint && signozIngestionKey) {
   });
 
   const provider = new WebTracerProvider({
-    resource: new Resource({
-      [SEMRESATTRS_SERVICE_NAME]: appName,
+    resource: resourceFromAttributes({
+      [ATTR_SERVICE_NAME]: appName,
     }),
   });
 
