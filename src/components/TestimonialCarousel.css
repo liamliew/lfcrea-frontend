@@ -1,0 +1,95 @@
+.testimonial-carousel {
+  width: 100%;
+  max-width: 800px;
+  height: 350px;
+  position: relative;
+  margin: 0 auto;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.testimonial-cards-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.testimonial-card {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 90%;
+  max-width: 600px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 2.5rem;
+  border-radius: 1.5rem;
+  text-align: center;
+  opacity: 0;
+  transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.testimonial-card.active {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+  pointer-events: auto;
+  z-index: 2;
+}
+
+.testimonial-card.prev {
+  opacity: 0;
+  transform: translate(-150%, -50%) scale(0.8);
+  z-index: 1;
+}
+
+.testimonial-card.next {
+  opacity: 0;
+  transform: translate(50%, -50%) scale(0.8);
+  z-index: 1;
+}
+
+.testimonial-text {
+  font-family: 'Figtree', sans-serif;
+  font-size: 1.2rem;
+  line-height: 1.6;
+  color: white;
+  margin: 0;
+  font-style: italic;
+}
+
+.testimonial-author {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.testimonial-name {
+  font-family: 'Figtree', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: white;
+}
+
+.testimonial-company {
+  font-family: 'Figtree', sans-serif;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+@media (max-width: 768px) {
+  .testimonial-text {
+    font-size: 1.1rem;
+  }
+  .testimonial-card {
+    padding: 1.5rem;
+  }
+}
