@@ -21,9 +21,9 @@ if (signozEndpoint && signozIngestionKey) {
     resource: resourceFromAttributes({
       [ATTR_SERVICE_NAME]: appName,
     }),
+    spanProcessors: [new BatchSpanProcessor(exporter)],
   });
 
-  provider.addSpanProcessor(new BatchSpanProcessor(exporter));
   provider.register();
 
   registerInstrumentations({
