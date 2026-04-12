@@ -1,4 +1,4 @@
-import React, { useCallback, useLayoutEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import './StaggeredMenu.css';
 
@@ -259,7 +259,7 @@ export const StaggeredMenu = ({
         [openMenuButtonColor, menuButtonColor, changeMenuColorOnOpen]
     );
 
-    React.useEffect(() => {
+    useEffect(() => {
         if (toggleBtnRef.current) {
             if (changeMenuColorOnOpen) {
                 const targetColor = openRef.current ? openMenuButtonColor : menuButtonColor;
@@ -326,7 +326,7 @@ export const StaggeredMenu = ({
         }
     }, [playClose, animateIcon, animateColor, animateText, onMenuClose]);
 
-    React.useEffect(() => {
+    useEffect(() => {
         if (!closeOnClickAway || !open) return;
 
         const handleClickOutside = event => {

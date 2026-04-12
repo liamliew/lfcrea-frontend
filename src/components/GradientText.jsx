@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { motion, useMotionValue, useAnimationFrame, useTransform } from 'framer-motion';
 import './GradientText.css';
 
@@ -12,7 +12,8 @@ export default function GradientText({
   pauseOnHover = false,
   yoyo = true
 }) {
-  const [isPaused, setIsPaused] = useState(false);
+  // Use a ref so the animation frame reads the latest value without stale closures
+  const isPausedRef = useRef(false);
   const progress = useMotionValue(0);
   const elapsedRef = useRef(0);
   const lastTimeRef = useRef(null);
@@ -20,7 +21,7 @@ export default function GradientText({
   const animationDuration = animationSpeed * 1000;
 
   useAnimationFrame(time => {
-    if (isPaused) {
+    if (isPausedRef.current) {
       lastTimeRef.current = null;
       return;
     }
@@ -66,11 +67,11 @@ export default function GradientText({
   });
 
   const handleMouseEnter = useCallback(() => {
-    if (pauseOnHover) setIsPaused(true);
+    if (pauseOnHover) isPausedRef.current = true;
   }, [pauseOnHover]);
 
   const handleMouseLeave = useCallback(() => {
-    if (pauseOnHover) setIsPaused(false);
+    if (pauseOnHover) isPausedRef.current = false;
   }, [pauseOnHover]);
 
   const gradientAngle =

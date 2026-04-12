@@ -1,4 +1,3 @@
-import React from 'react';
 import './FAQSimple.css';
 
 const faqs = [
@@ -16,7 +15,7 @@ const faqs = [
     },
     {
         question: "Does live broadcasting come with every event package?",
-        answer: "No. If you need live broadcasting, you can book it seperately, or add it on if you have already booked our event package.",
+        answer: "No. If you need live broadcasting, you can book it separately, or add it on if you have already booked our event package.",
     },
     {
         question: "How does your billing work?",

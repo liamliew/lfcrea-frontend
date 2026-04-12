@@ -1,4 +1,3 @@
-import React from 'react';
 import './TeamSection.css';
 import lfcLogo from '../assets/lfcLogo.svg';
 

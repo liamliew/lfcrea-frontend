@@ -20,6 +20,8 @@ const socialItems = [
   { label: 'LinkedIn', link: 'https://linkedin.com' }
 ];
 
+const HERO_GRADIENT_COLORS = ['#5227FF', '#FF9FFC', '#B19EEF'];
+
 export default function App() {
   const [segments, setSegments] = useState(typeof window !== 'undefined' && window.innerWidth < 768 ? 16 : 34);
 
@@ -49,7 +51,7 @@ export default function App() {
           <h1 className="middle-header">
             We chase{' '}
             <GradientText
-              colors={["#5227FF", "#FF9FFC", "#B19EEF"]}
+              colors={HERO_GRADIENT_COLORS}
               animationSpeed={6.5}
               showBorder={false}
             >
@@ -93,8 +95,6 @@ export default function App() {
         colors={['#B19EEF', '#5227FF']}
         logoUrl="./src/assets/lfcLogo.svg"
         accentColor="#000000"
-        onMenuOpen={() => console.log('Menu opened')}
-        onMenuClose={() => console.log('Menu closed')}
         isFixed={true}
       />
     </div>
