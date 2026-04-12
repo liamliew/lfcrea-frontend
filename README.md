@@ -11,6 +11,26 @@ Currently, two official plugins are available:
 
 The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
 
-## Expanding the ESLint configuration
+## SigNoz Cloud Tracing
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+This project is configured with OpenTelemetry for frontend tracing via SigNoz Cloud.
+
+### Setup
+
+1.  **Clone the environment variables:**
+    ```bash
+    cp .env.example .env
+    ```
+
+2.  **Configure SigNoz Credentials:**
+    Open `.env` and fill in the following values from your SigNoz Cloud dashboard (**Settings** &rarr; **Ingestion Settings**):
+    -   `VITE_SIGNOZ_ENDPOINT`: Your SigNoz Cloud OTLP HTTP Endpoint.
+    -   `VITE_SIGNOZ_INGESTION_KEY`: Your SigNoz Cloud Ingestion Key.
+    -   `VITE_APP_NAME`: Your application's identifier.
+
+### Features
+
+The following automatic instrumentations are enabled:
+-   **Fetch & XHR**: Captures all outgoing network requests.
+-   **User Interaction**: Captures clicks and other user interactions.
+-   **Document Load**: Captures page load metrics.
