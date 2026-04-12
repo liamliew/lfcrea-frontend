@@ -6,7 +6,7 @@ export default defineConfig({
   plugins: [react()],
   server: {
     allowedHosts: ['ide5.triage.lt', 'lfcrea.com']
-  }
+  },
   optimizeDeps: {
     include: [
       '@opentelemetry/resources',
