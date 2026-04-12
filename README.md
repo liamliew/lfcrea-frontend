@@ -28,9 +28,36 @@ This project is configured with OpenTelemetry for frontend tracing via SigNoz Cl
     -   `VITE_SIGNOZ_INGESTION_KEY`: Your SigNoz Cloud Ingestion Key.
     -   `VITE_APP_NAME`: Your application's identifier.
 
-### Features
+### Deployment & Webhook Setup
 
-The following automatic instrumentations are enabled:
--   **Fetch & XHR**: Captures all outgoing network requests.
--   **User Interaction**: Captures clicks and other user interactions.
--   **Document Load**: Captures page load metrics.
+This repository includes a webhook server (in the `webhook/` directory) for automatic deployment on your server.
+
+#### 1. Setup Webhook Server
+1.  Navigate to the `webhook` directory on your server.
+2.  Install dependencies:
+    ```bash
+    npm install
+    ```
+3.  Configure environment:
+    ```bash
+    cp .env.example .env
+    ```
+4.  Generate a secret:
+    ```bash
+    openssl rand -hex 32
+    ```
+    Add this secret to your `.env` file as `GITHUB_WEBHOOK_SECRET`.
+5.  Start the server with PM2:
+    ```bash
+    pm2 start index.js --name lfcrea-webhook
+    pm2 save
+    pm2 startup
+    ```
+
+#### 2. Configure GitHub
+1.  Go to your GitHub repository **Settings** &rarr; **Webhooks** &rarr; **Add webhook**.
+2.  **Payload URL**: `http://your-server-ip:9000/webhook`
+3.  **Content type**: `application/json`
+4.  **Secret**: Paste the same secret you generated in step 4.
+5.  Select **Just the push event**.
+6.  Click **Add webhook**.

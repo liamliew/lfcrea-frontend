@@ -93,7 +93,7 @@ export default function App() {
         openMenuButtonColor="#000000"
         changeMenuColorOnOpen={true}
         colors={['#B19EEF', '#5227FF']}
-        logoUrl="./src/assets/lfcLogo.svg"
+        logoUrl="/lfcLogo.svg"
         accentColor="#000000"
         isFixed={true}
       />

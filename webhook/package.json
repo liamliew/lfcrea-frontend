@@ -1,0 +1,12 @@
+{
+  "name": "lfcrea-webhook",
+  "version": "1.0.0",
+  "description": "GitHub webhook server for auto-deploying lfcrea-frontend",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.7"
+  }
+}
