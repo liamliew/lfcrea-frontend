@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef } from 'react';
-import { motion, useMotionValue, useAnimationFrame, useTransform } from 'framer-motion';
+import { gsap } from 'gsap';
 import './GradientText.css';
 
 export default function GradientText({
@@ -10,91 +10,77 @@ export default function GradientText({
   showBorder = false,
   direction = 'horizontal',
   pauseOnHover = false,
-  yoyo = true
+  yoyo = true,
 }) {
-  // Use a ref so the animation frame reads the latest value without stale closures
-  const isPausedRef = useRef(false);
-  const progress = useMotionValue(0);
-  const elapsedRef = useRef(0);
-  const lastTimeRef = useRef(null);
-
-  const animationDuration = animationSpeed * 1000;
-
-  useAnimationFrame(time => {
-    if (isPausedRef.current) {
-      lastTimeRef.current = null;
-      return;
-    }
-
-    if (lastTimeRef.current === null) {
-      lastTimeRef.current = time;
-      return;
-    }
-
-    const deltaTime = time - lastTimeRef.current;
-    lastTimeRef.current = time;
-    elapsedRef.current += deltaTime;
-
-    if (yoyo) {
-      const fullCycle = animationDuration * 2;
-      const cycleTime = elapsedRef.current % fullCycle;
-
-      if (cycleTime < animationDuration) {
-        progress.set((cycleTime / animationDuration) * 100);
-      } else {
-        progress.set(100 - ((cycleTime - animationDuration) / animationDuration) * 100);
-      }
-    } else {
-      // Continuously increase position for seamless looping
-      progress.set((elapsedRef.current / animationDuration) * 100);
-    }
-  });
+  const overlayRef = useRef(null);
+  const textRef = useRef(null);
+  const tweenRef = useRef(null);
+  const pauseOnHoverRef = useRef(pauseOnHover);
 
   useEffect(() => {
-    elapsedRef.current = 0;
-    progress.set(0);
-  }, [animationSpeed, progress, yoyo]);
+    pauseOnHoverRef.current = pauseOnHover;
+  }, [pauseOnHover]);
 
-  const backgroundPosition = useTransform(progress, p => {
-    if (direction === 'horizontal') {
-      return `${p}% 50%`;
-    } else if (direction === 'vertical') {
-      return `50% ${p}%`;
-    } else {
-      // For diagonal, move only horizontally to avoid interference patterns
-      return `${p}% 50%`;
-    }
-  });
+  useEffect(() => {
+    const proxy = { p: 0 };
+
+    const setPosition = (p) => {
+      const pos = direction === 'vertical' ? `50% ${p}%` : `${p}% 50%`;
+      if (overlayRef.current) overlayRef.current.style.backgroundPosition = pos;
+      if (textRef.current) textRef.current.style.backgroundPosition = pos;
+    };
+
+    setPosition(0);
+
+    tweenRef.current = gsap.to(proxy, {
+      p: 100,
+      duration: animationSpeed,
+      ease: 'none',
+      repeat: -1,
+      yoyo,
+      onUpdate: () => setPosition(proxy.p),
+    });
+
+    return () => {
+      tweenRef.current.kill();
+    };
+  }, [animationSpeed, yoyo, direction]);
 
   const handleMouseEnter = useCallback(() => {
-    if (pauseOnHover) isPausedRef.current = true;
-  }, [pauseOnHover]);
+    if (pauseOnHoverRef.current) tweenRef.current?.pause();
+  }, []);
 
   const handleMouseLeave = useCallback(() => {
-    if (pauseOnHover) isPausedRef.current = false;
-  }, [pauseOnHover]);
+    if (pauseOnHoverRef.current) tweenRef.current?.resume();
+  }, []);
 
   const gradientAngle =
-    direction === 'horizontal' ? 'to right' : direction === 'vertical' ? 'to bottom' : 'to bottom right';
-  // Duplicate first color at the end for seamless looping
+    direction === 'horizontal' ? 'to right' :
+    direction === 'vertical' ? 'to bottom' :
+    'to bottom right';
   const gradientColors = [...colors, colors[0]].join(', ');
 
   const gradientStyle = {
     backgroundImage: `linear-gradient(${gradientAngle}, ${gradientColors})`,
-    backgroundSize: direction === 'horizontal' ? '300% 100%' : direction === 'vertical' ? '100% 300%' : '300% 300%',
-    backgroundRepeat: 'repeat'
+    backgroundSize:
+      direction === 'horizontal' ? '300% 100%' :
+      direction === 'vertical' ? '100% 300%' :
+      '300% 300%',
+    backgroundRepeat: 'repeat',
   };
 
   return (
-    <motion.div
+    <div
       className={`animated-gradient-text ${showBorder ? 'with-border' : ''} ${className}`}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      {showBorder && <motion.div className="gradient-overlay" style={{ ...gradientStyle, backgroundPosition }} />}
-      <motion.div className="text-content" style={{ ...gradientStyle, backgroundPosition }}>
+      {showBorder && (
+        <div ref={overlayRef} className="gradient-overlay" style={gradientStyle} />
+      )}
+      <div ref={textRef} className="text-content" style={gradientStyle}>
         {children}
-      </motion.div>
-    </motion.div>
+      </div>
+    </div>
   );
 }

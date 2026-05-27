@@ -1,3 +1,10 @@
+/*
+ * SECURITY NOTICE — DO NOT expose this server directly on HTTP in production.
+ * This server must be placed behind a reverse proxy (nginx, Caddy, etc.) that
+ * handles TLS termination. The GitHub webhook payload URL configured in your
+ * repository settings should use HTTPS (e.g. https://yourdomain.com/webhook),
+ * not the raw HTTP port this process listens on.
+ */
 const http = require('http');
 const crypto = require('crypto');
 const { exec } = require('child_process');

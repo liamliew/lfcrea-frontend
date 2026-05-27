@@ -17,34 +17,6 @@ body {
   background: black;
 }
 
-.sticky-book-btn {
-  position: fixed;
-  top: 1rem;
-  left: 50%;
-  transform: translateX(-50%);
-  background-color: white;
-  padding: 0.6rem 2.5rem;
-  border-radius: 2rem;
-  text-decoration: none;
-  z-index: 100;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: transform 0.2s ease, opacity 0.2s ease;
-}
-
-.sticky-book-btn span {
-  font-family: 'Figtree', sans-serif;
-  font-weight: 700;
-  font-size: 1rem;
-  color: black;
-}
-
-.sticky-book-btn:hover {
-  transform: translateX(-50%) scale(1.05);
-  opacity: 0.9;
-}
-
 .section {
   width: 100%;
   height: 100vh;

@@ -10,22 +10,22 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@opentelemetry/api": "^1.9.1",
+    "@opentelemetry/api": "^1.9.0",
     "@opentelemetry/auto-instrumentations-web": "^0.59.0",
-    "@opentelemetry/exporter-trace-otlp-http": "^0.214.0",
-    "@opentelemetry/instrumentation": "^0.214.0",
-    "@opentelemetry/resources": "^2.6.1",
-    "@opentelemetry/sdk-trace-web": "^2.6.1",
+    "@opentelemetry/exporter-trace-otlp-http": "^0.200.0",
+    "@opentelemetry/instrumentation": "^0.200.0",
+    "@opentelemetry/resources": "^2.0.0",
+    "@opentelemetry/sdk-trace-web": "^2.0.0",
     "@opentelemetry/semantic-conventions": "^1.40.0",
     "@sentry/react": "^10.48.0",
+    "@supabase/supabase-js": "^2.106.2",
     "@untitledui/icons": "^0.0.21",
     "@use-gesture/react": "^10.3.1",
     "gsap": "^3.14.2",
-    "motion": "^12.36.0",
     "react": "^19.2.4",
     "react-aria-components": "^1.16.0",
     "react-dom": "^19.2.4",
-    "rolldown": "^1.0.0-rc.9",
+    "react-router-dom": "^7.15.1",
     "tailwind-merge": "^3.5.0"
   },
   "devDependencies": {
@@ -37,10 +37,10 @@
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.5.2",
     "globals": "^17.4.0",
+    "rolldown": "^1.0.0-rc.9",
     "vite": "^8.0.0"
   },
   "description": "Beta prebuild of LFcrea's home website.",
-  "main": "eslint.config.js",
-  "author": "",
+  "author": "LF Creative",
   "license": "ISC"
 }

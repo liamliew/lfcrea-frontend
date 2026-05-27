@@ -1,6 +1,7 @@
 import './instrumentation'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
+import { BrowserRouter } from 'react-router-dom'
 import * as Sentry from "@sentry/react";
 import './index.css'
 import App from './App.jsx'
@@ -15,7 +16,9 @@ Sentry.init({
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <Sentry.ErrorBoundary fallback={<p>Something went wrong. Please try again later.</p>}>
-      <App />
+      <BrowserRouter>
+        <App />
+      </BrowserRouter>
     </Sentry.ErrorBoundary>
   </StrictMode>,
 )
