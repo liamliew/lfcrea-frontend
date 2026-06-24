@@ -1,0 +1,63 @@
+.about-us-section {
+  background: black;
+  padding: 80px 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3rem;
+}
+
+.about-us-content {
+  display: flex;
+  align-items: center;
+  gap: 3rem;
+  max-width: 1200px;
+  width: 100%;
+}
+
+.about-us-img {
+  width: 260px;
+  height: 360px;
+  flex-shrink: 0;
+  object-fit: cover;
+  border-radius: 12px;
+}
+
+.about-us-img-placeholder {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1.5px dashed rgba(255, 255, 255, 0.15);
+}
+
+.about-us-text {
+  font-family: 'Figtree', sans-serif;
+  font-size: clamp(1rem, 1.8vw, 1.2rem);
+  line-height: 1.8;
+  color: rgba(255, 255, 255, 0.75);
+  text-align: center;
+  margin: 0;
+  flex: 1;
+}
+
+/* Hide side images when viewport is too narrow to show them alongside text */
+@media (max-width: 900px) {
+  .about-us-img {
+    display: none;
+  }
+
+  .about-us-content {
+    justify-content: center;
+  }
+
+  .about-us-text {
+    font-size: 1rem;
+    text-align: center;
+    max-width: 600px;
+  }
+}
+
+@media (max-width: 768px) {
+  .about-us-section {
+    padding: 60px 1.5rem;
+    gap: 2rem;
+  }
+}

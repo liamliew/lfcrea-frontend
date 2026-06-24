@@ -1,10 +1,10 @@
 import { useState, useEffect, lazy, Suspense } from 'react'
 import DomeGallery from '../components/DomeGallery'
 import GradientText from '../components/GradientText'
-import TestimonialCarousel from '../components/TestimonialCarousel'
 import TeamSection from '../components/TeamSection'
 import FAQSimple from '../components/FAQSimple'
 import InstagramCarousel from '../components/InstagramCarousel/InstagramCarousel'
+import AboutUs from '../components/AboutUs/AboutUs'
 
 const PortfolioGrid = lazy(() => import('../components/Portfolio/PortfolioGrid'));
 
@@ -45,31 +45,11 @@ export default function Home() {
           </h1>
         </div>
       </div>
-      <div className="section second-section">
-        <h2 className="sub-header">For as low as RM70 an hour, you'll get</h2>
-        <div className="cards-container">
-          <div className="card">
-            <h3 className="card-header">Professional Photographs</h3>
-            <p className="card-content">Professional grade photos for your event, capturing the emotions, actions and milestones of your events.</p>
-          </div>
-          <div className="card">
-            <h3 className="card-header">Hooking Video</h3>
-            <p className="card-content">2 videos of your choice. Make reel-style promotional videos, or stick it the old-fashioned way, with high quality advertisements.</p>
-          </div>
-          <div className="card">
-            <h3 className="card-header">Live Broadcast</h3>
-            <p className="card-content">Need to stream your event to the world? We can provide in house live production, including for big screens. Just provide a room, and we'll do the rest. (T&C Apply)</p>
-          </div>
-        </div>
-      </div>
+<AboutUs />
       <InstagramCarousel />
       <Suspense fallback={<div style={{ minHeight: '400px' }} />}>
         <PortfolioGrid />
       </Suspense>
-      <div className="section third-section">
-        <h2 className="sub-header">Here's what our clients complained about</h2>
-        <TestimonialCarousel />
-      </div>
       <TeamSection />
       <FAQSimple />
     </div>

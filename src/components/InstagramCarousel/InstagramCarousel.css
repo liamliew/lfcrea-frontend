@@ -5,6 +5,20 @@
 .ig-carousel-viewport {
   width: 100%;
   overflow: hidden;
+  mask-image: linear-gradient(
+    to right,
+    transparent 0%,
+    black 12%,
+    black 88%,
+    transparent 100%
+  );
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent 0%,
+    black 12%,
+    black 88%,
+    transparent 100%
+  );
 }
 
 .ig-carousel-track {
@@ -41,8 +55,10 @@
   position: absolute;
   inset: 0;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: 8px;
   color: #fff;
   opacity: 0;
   background: rgba(0, 0, 0, 0);
@@ -52,4 +68,19 @@
 .ig-carousel-card:hover .ig-carousel-overlay {
   opacity: 1;
   background: rgba(0, 0, 0, 0.4);
+}
+
+.ig-carousel-stats {
+  display: flex;
+  gap: 12px;
+}
+
+.ig-carousel-stat {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
 }
