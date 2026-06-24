@@ -1,4 +1,5 @@
 import { useState, useEffect, lazy, Suspense } from 'react'
+import { Link } from 'react-router-dom'
 import DomeGallery from '../components/DomeGallery'
 import GradientText from '../components/GradientText'
 import TeamSection from '../components/TeamSection'
@@ -32,7 +33,7 @@ export default function Home() {
           dragDampening={2}
           grayscale={false}
         />
-        <div className="middle-header-container">
+        <div className="hero-content">
           <h1 className="middle-header">
             We chase{' '}
             <GradientText
@@ -43,6 +44,20 @@ export default function Home() {
               Emotions
             </GradientText>
           </h1>
+          <p className="hero-tagline">
+            Photography &amp; videography for the moments that matter —<br />
+            based in Malaysia, run by students.
+          </p>
+          <div className="hero-buttons">
+            <a
+              href="https://lfcrea.setmore.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hero-btn hero-btn-primary"
+            >
+              Book us
+            </a>
+          </div>
         </div>
       </div>
 <AboutUs />

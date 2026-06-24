@@ -5,6 +5,7 @@ import Navbar from './components/Navbar/Navbar'
 
 const Home = lazy(() => import('./pages/Home'));
 const Portfolio = lazy(() => import('./pages/Portfolio'));
+const Booking = lazy(() => import('./pages/Booking'));
 
 export default function App() {
   return (
@@ -14,6 +15,7 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/portfolio" element={<Portfolio />} />
+          <Route path="/booking" element={<Booking />} />
         </Routes>
       </Suspense>
     </>
