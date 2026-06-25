@@ -1,6 +1,80 @@
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react'; // useRef kept for TimeScale dragRef
+import { loadStripe } from '@stripe/stripe-js';
+import { CheckoutElementsProvider, PaymentElement, useCheckoutElements } from '@stripe/react-stripe-js/checkout';
 import { categories, blockedSlots, calcBookingTotal } from '../data/bookingData';
+import { createBooking } from '../services/bookingService';
+import { getSetting } from '../services/settingsService';
+import { getBlockedHours } from '../services/calendarService';
+import BookingUnavailable from './BookingUnavailable';
 import './Booking.css';
+
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
+
+const stripeAppearance = {
+  theme: 'night',
+  variables: {
+    colorPrimary: '#5227FF',
+    colorBackground: '#0c0c0c',
+    colorText: '#ffffff',
+    colorTextSecondary: 'rgba(255,255,255,0.50)',
+    colorTextPlaceholder: 'rgba(255,255,255,0.28)',
+    colorDanger: '#ff5a5a',
+    fontFamily: "'Figtree', sans-serif",
+    fontSizeBase: '14.5px',
+    spacingUnit: '4px',
+    borderRadius: '6px',
+  },
+  rules: {
+    '.Input': {
+      border: '1px solid rgba(255,255,255,0.15)',
+      backgroundColor: 'transparent',
+      color: 'rgba(255,255,255,0.9)',
+    },
+    '.Input:focus': {
+      border: '1px solid rgba(82,39,255,0.7)',
+      boxShadow: '0 0 0 3px rgba(82,39,255,0.18)',
+      outline: 'none',
+    },
+    '.Input--invalid': {
+      border: '1px solid rgba(255,70,70,0.6)',
+      boxShadow: '0 0 0 3px rgba(255,50,50,0.12)',
+    },
+    '.Label': {
+      fontWeight: '500',
+      color: 'rgba(255,255,255,0.9)',
+      fontSize: '13.5px',
+      letterSpacing: '0.01em',
+    },
+    '.Error': {
+      color: 'rgb(255,90,90)',
+      fontSize: '12px',
+    },
+    '.Tab': {
+      border: '1px solid rgba(255,255,255,0.10)',
+      backgroundColor: 'rgba(255,255,255,0.04)',
+    },
+    '.Tab:hover': {
+      border: '1px solid rgba(255,255,255,0.20)',
+      backgroundColor: 'rgba(255,255,255,0.08)',
+    },
+    '.Tab--selected': {
+      border: '1px solid rgba(82,39,255,0.70)',
+      backgroundColor: 'rgba(82,39,255,0.10)',
+      color: '#ffffff',
+    },
+    '.Tab--selected:focus': {
+      boxShadow: '0 0 0 3px rgba(82,39,255,0.18)',
+    },
+    '.CheckboxInput': {
+      border: '1.5px solid rgba(255,255,255,0.25)',
+      backgroundColor: 'transparent',
+    },
+    '.CheckboxInput--checked': {
+      border: '1.5px solid #5227FF',
+      backgroundColor: '#5227FF',
+    },
+  },
+};
 
 // ── Button ────────────────────────────────────────────────────────────────────
 function Button({ variant = 'primary', onClick, disabled, children }) {
@@ -328,14 +402,28 @@ function CalendarStep({ value, onChange }) {
   );
 }
 
+function mergeBlockedHours(hours) {
+  if (!hours || !hours.length) return [];
+  const sorted = [...hours].sort((a, b) => a - b);
+  const slots = [];
+  let start = sorted[0], end = sorted[0] + 1;
+  for (let i = 1; i < sorted.length; i++) {
+    if (sorted[i] === end) { end++; }
+    else { slots.push({ start, end }); start = sorted[i]; end = sorted[i] + 1; }
+  }
+  slots.push({ start, end });
+  return slots;
+}
+
 // ── Step 3: Time ──────────────────────────────────────────────────────────────
-function TimeStep({ booking, setBooking }) {
+function TimeStep({ booking, setBooking, blockedHours = [] }) {
   const cat = categories[booking.category];
   const pkg = cat?.packages.find(p => p.id === booking.packageId);
   if (!booking.timeRange || !pkg) return null;
   const isHourly = cat.type === 'hourly';
   const dur = booking.timeRange.endHour - booking.timeRange.startHour;
   const est = calcBookingTotal(booking);
+  const liveBlockedSlots = mergeBlockedHours(blockedHours);
 
   return (
     <div className="step-content">
@@ -362,7 +450,7 @@ function TimeStep({ booking, setBooking }) {
           maxH={cat.maxHours}
           value={booking.timeRange}
           onChange={tr => setBooking(p => ({ ...p, timeRange: tr }))}
-          blocked={blockedSlots}
+          blocked={liveBlockedSlots}
         />
       </div>
 
@@ -398,22 +486,42 @@ function TimeStep({ booking, setBooking }) {
 }
 
 // ── Shad Input ────────────────────────────────────────────────────────────────
-function ShadInput({ label, hint, type = 'text', placeholder, value, onChange, multiline }) {
+function ShadInput({ label, hint, error, type = 'text', placeholder, value, onChange, onBlur, multiline }) {
   return (
     <div className="shad-field">
       {label && <label className="shad-label">{label}</label>}
       {multiline
-        ? <textarea className="shad-input shad-textarea" placeholder={placeholder} value={value} onChange={onChange} rows={3} />
-        : <input className="shad-input" type={type} placeholder={placeholder} value={value} onChange={onChange} />}
-      {hint && <p className="shad-hint">{hint}</p>}
+        ? <textarea className={`shad-input shad-textarea${error ? ' shad-input--error' : ''}`} placeholder={placeholder} value={value} onChange={onChange} onBlur={onBlur} rows={3} />
+        : <input className={`shad-input${error ? ' shad-input--error' : ''}`} type={type} placeholder={placeholder} value={value} onChange={onChange} onBlur={onBlur} />}
+      {error  && <p className="shad-error">{error}</p>}
+      {!error && hint && <p className="shad-hint">{hint}</p>}
     </div>
   );
 }
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+const PHONE_RE = /^[+]?[\d][\d\s\-().]{6,19}$/;
 
 // ── Step 4: Contact ───────────────────────────────────────────────────────────
 function ContactStep({ booking, setBooking }) {
   const set = (k, v) => setBooking(p => ({ ...p, contact: { ...p.contact, [k]: v } }));
   const c = booking.contact;
+  const [errors, setErrors] = useState({});
+
+  const validateEmail = () => {
+    if (c.email && !EMAIL_RE.test(c.email))
+      setErrors(e => ({ ...e, email: 'Please enter a valid email address.' }));
+    else
+      setErrors(e => ({ ...e, email: null }));
+  };
+
+  const validatePhone = () => {
+    if (c.phone && !PHONE_RE.test(c.phone))
+      setErrors(e => ({ ...e, phone: 'Please enter a valid phone number.' }));
+    else
+      setErrors(e => ({ ...e, phone: null }));
+  };
+
   return (
     <div className="step-content">
       <div className="step-hd">
@@ -422,8 +530,8 @@ function ContactStep({ booking, setBooking }) {
       </div>
       <div className="contact-form">
         <ShadInput label="Full name" placeholder="Your name" value={c.name} onChange={e => set('name', e.target.value)} />
-        <ShadInput label="Email" type="email" placeholder="you@email.com" value={c.email} onChange={e => set('email', e.target.value)} />
-        <ShadInput label="Phone number" type="tel" placeholder="+60 12-345 6789" value={c.phone} onChange={e => set('phone', e.target.value)} />
+        <ShadInput label="Email" type="email" placeholder="you@email.com" value={c.email} onChange={e => set('email', e.target.value)} onBlur={validateEmail} error={errors.email} />
+        <ShadInput label="Phone number" type="tel" placeholder="+60 12-345 6789" value={c.phone} onChange={e => set('phone', e.target.value)} onBlur={validatePhone} error={errors.phone} />
         <ShadInput label="Location" placeholder="Search or describe the venue / area" value={c.location} onChange={e => set('location', e.target.value)} hint="We'll follow up to confirm directions before the shoot." />
         <ShadInput label="Notes" multiline placeholder="Outfit changes, specific shots, access details…" value={c.notes} onChange={e => set('notes', e.target.value)} />
       </div>
@@ -621,23 +729,103 @@ function ContractStep({ booking, setBooking }) {
   );
 }
 
-// ── Step 7: Payment ───────────────────────────────────────────────────────────
-function PaymentStep() {
-  const [card, setCard] = useState({ number: '', expiry: '', cvc: '', name: '' });
-  const set = (k, v) => setCard(p => ({ ...p, [k]: v }));
+// ── Stripe inner form (must live inside <CheckoutElementsProvider>) ───────────
+function PaymentForm({ booking, onSuccess }) {
+  const { checkout } = useCheckoutElements();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-  const fmtNumber = v => v.replace(/\D/g, '').slice(0, 16).replace(/(\d{4})/g, '$1 ').trim();
-  const fmtExpiry = v => { const d = v.replace(/\D/g, '').slice(0, 4); return d.length >= 3 ? d.slice(0, 2) + '/' + d.slice(2) : d; };
-  const fmtCvc = v => v.replace(/\D/g, '').slice(0, 4);
-
-  const cardType = () => {
-    const n = card.number.replace(/\s/g, '');
-    if (/^4/.test(n)) return 'visa';
-    if (/^5[1-5]|^2[2-7]/.test(n)) return 'mc';
-    if (/^3[47]/.test(n)) return 'amex';
-    return null;
+  const handleConfirm = async () => {
+    if (!checkout?.confirm) return;
+    setLoading(true);
+    setError(null);
+    try {
+      const result = await checkout.confirm({
+        email: booking.contact.email,
+        redirect: 'if_required',
+      });
+      if (result.type === 'error') {
+        setError(result.error.message);
+        return;
+      }
+      const cat = categories[booking.category];
+      const pkg = cat?.packages.find(p => p.id === booking.packageId);
+      const { error: dbError } = await createBooking({
+        category: booking.category,
+        package_id: booking.packageId,
+        package_name: pkg?.name ?? '',
+        addons: booking.addons,
+        event_date: booking.date.toISOString().split('T')[0],
+        start_hour: booking.timeRange.startHour,
+        end_hour: booking.timeRange.endHour,
+        total_price: calcBookingTotal(booking),
+        deposit_amount: 200,
+        client_name: booking.contact.name,
+        client_email: booking.contact.email,
+        client_phone: booking.contact.phone || null,
+        location: booking.contact.location,
+        notes: booking.contact.notes || null,
+        stripe_payment_intent_id: null,
+      });
+      if (dbError) {
+        setError("Payment succeeded but your booking couldn't be saved. Please contact us with your payment confirmation.");
+      } else {
+        onSuccess();
+      }
+    } catch (err) {
+      setError(err?.message || 'Something went wrong. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
-  const type = cardType();
+
+  return (
+    <>
+      <PaymentElement />
+      {error && <p className="pay-error" style={{ marginTop: '12px' }}>{error}</p>}
+      <button
+        className="bk-btn bk-btn--accent"
+        style={{ marginTop: '24px', width: '100%' }}
+        onClick={handleConfirm}
+        disabled={loading}
+      >
+        {loading ? 'Processing…' : 'Pay RM200 deposit'}
+      </button>
+    </>
+  );
+}
+
+// ── Step 7: Payment ───────────────────────────────────────────────────────────
+function PaymentStep({ booking, onSuccess }) {
+  const [clientSecret, setClientSecret] = useState(null);
+  const [piLoading, setPiLoading] = useState(true);
+  const [piError, setPiError] = useState(null);
+
+  useEffect(() => {
+    fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/create-payment-intent`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        amount: 20000,
+        currency: 'myr',
+        booking_metadata: {
+          category: booking.category,
+          client_name: booking.contact.name,
+          client_email: booking.contact.email,
+        },
+      }),
+    })
+      .then(r => r.json())
+      .then(data => {
+        if (data.clientSecret) setClientSecret(data.clientSecret);
+        else setPiError(data.error || 'Failed to initialise payment.');
+      })
+      .catch(() => setPiError('Failed to reach payment server. Please try again.'))
+      .finally(() => setPiLoading(false));
+  }, []);
 
   return (
     <div className="step-content">
@@ -651,39 +839,19 @@ function PaymentStep() {
         <span className="pay-amount-val">RM200</span>
       </div>
 
-      <div className="pay-form">
-        <div className="shad-field">
-          <label className="shad-label">Card number</label>
-          <div className="pay-card-wrap">
-            <input className="shad-input pay-card-input" type="text" inputMode="numeric"
-              placeholder="1234 5678 9012 3456" value={card.number}
-              onChange={e => set('number', fmtNumber(e.target.value))} maxLength={19} />
-            <div className="pay-card-icon">
-              {type === 'visa' && <svg viewBox="0 0 48 16" width="36" height="12"><text x="0" y="13" fontFamily="Arial" fontWeight="700" fontSize="14" fill="#1a1f71" letterSpacing="1">VISA</text></svg>}
-              {type === 'mc' && <svg width="32" height="20" viewBox="0 0 32 20"><circle cx="12" cy="10" r="10" fill="#eb001b" opacity="0.9"/><circle cx="20" cy="10" r="10" fill="#f79e1b" opacity="0.9"/><path d="M16 4.8a10 10 0 010 10.4A10 10 0 0116 4.8z" fill="#ff5f00"/></svg>}
-              {type === 'amex' && <svg viewBox="0 0 48 16" width="36" height="12"><text x="0" y="13" fontFamily="Arial" fontWeight="700" fontSize="11" fill="#2e77bc">AMEX</text></svg>}
-              {!type && <svg width="22" height="16" viewBox="0 0 22 16" fill="none"><rect x="0.5" y="0.5" width="21" height="15" rx="2.5" stroke="rgba(255,255,255,0.2)"/><rect x="0" y="4" width="22" height="4" fill="rgba(255,255,255,0.12)"/></svg>}
-            </div>
+      {piLoading && <div className="pay-pi-skeleton" />}
+      {piError && <p className="pay-error">{piError}</p>}
+
+      {clientSecret && (
+        <CheckoutElementsProvider
+          stripe={stripePromise}
+          options={{ clientSecret, elementsOptions: { appearance: stripeAppearance } }}
+        >
+          <div className="pay-elements-wrap">
+            <PaymentForm booking={booking} onSuccess={onSuccess} />
           </div>
-        </div>
-        <div className="pay-row">
-          <div className="shad-field">
-            <label className="shad-label">Expiry</label>
-            <input className="shad-input" type="text" inputMode="numeric" placeholder="MM/YY"
-              value={card.expiry} onChange={e => set('expiry', fmtExpiry(e.target.value))} maxLength={5} />
-          </div>
-          <div className="shad-field">
-            <label className="shad-label">CVC</label>
-            <input className="shad-input" type="text" inputMode="numeric" placeholder="123"
-              value={card.cvc} onChange={e => set('cvc', fmtCvc(e.target.value))} maxLength={4} />
-          </div>
-        </div>
-        <div className="shad-field">
-          <label className="shad-label">Name on card</label>
-          <input className="shad-input" type="text" placeholder="As it appears on the card"
-            value={card.name} onChange={e => set('name', e.target.value)} />
-        </div>
-      </div>
+        </CheckoutElementsProvider>
+      )}
 
       <div className="pay-stripe-badge">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" style={{ opacity: 0.4 }}><path d="M13.976 9.15c-2.172-.806-3.356-1.426-3.356-2.409 0-.831.683-1.305 1.901-1.305 2.227 0 4.515.858 6.09 1.631l.89-5.494C18.252.975 15.697 0 12.165 0 9.667 0 7.589.654 6.104 1.872 4.56 3.147 3.757 4.992 3.757 7.218c0 4.039 2.467 5.76 6.476 7.219 2.585.92 3.445 1.574 3.445 2.583 0 .98-.84 1.545-2.354 1.545-1.875 0-4.965-.921-6.99-2.109l-.9 5.555C5.175 22.99 8.385 24 11.714 24c2.641 0 4.843-.624 6.328-1.813 1.664-1.305 2.525-3.236 2.525-5.732 0-4.128-2.524-5.851-6.594-7.305h.003z"/></svg>
@@ -700,31 +868,59 @@ const INITIAL_BOOKING = {
   addons: [],
   date: null,
   timeRange: null,
+  blockedHours: [],
   contact: { name: '', email: '', phone: '', location: '', notes: '' },
 };
 
 export default function Booking() {
+  const [bookingMode, setBookingMode] = useState(null);
+
+  useEffect(() => {
+    getSetting('booking_mode').then(({ data }) => setBookingMode(data ?? 'active'));
+  }, []);
+
+  useEffect(() => {
+    if (bookingMode === 'redirect') {
+      window.location.href = 'https://lfcrea.setmore.com';
+    }
+  }, [bookingMode]);
+
   const [step, setStep] = useState(1);
   const [booking, setBooking] = useState(INITIAL_BOOKING);
   const [submitted, setSubmitted] = useState(false);
+  const [calLoading, setCalLoading] = useState(false);
+
+  if (bookingMode === null || bookingMode === 'redirect') return null;
+  if (bookingMode === 'block') return <BookingUnavailable />;
 
   const canNext = () => {
     if (step === 1) return !!booking.packageId;
     if (step === 2) return !!booking.date;
     if (step === 3) return !!booking.timeRange;
-    if (step === 4) return !!(booking.contact.name && booking.contact.email && booking.contact.phone);
+    if (step === 4) {
+      const { name, email, phone } = booking.contact;
+      return !!(name && email && phone && EMAIL_RE.test(email) && PHONE_RE.test(phone));
+    }
     if (step === 6) return !!booking.contractAgreed;
     return true;
   };
 
-  const goNext = () => {
+  const goNext = async () => {
     if (!canNext()) return;
-    if (step === 2 && !booking.timeRange) {
+    if (step === 2) {
       const cat = categories[booking.category];
       const pkg = cat?.packages.find(p => p.id === booking.packageId);
       const s = 10;
       const e = cat.type === 'hourly' ? s + cat.minHours : s + (pkg?.duration || 1);
-      setBooking(p => ({ ...p, timeRange: { startHour: s, endHour: e } }));
+      const dateStr = booking.date.toISOString().split('T')[0];
+      setCalLoading(true);
+      const { data: hours } = await getBlockedHours(dateStr);
+      setCalLoading(false);
+      setBooking(p => ({
+        ...p,
+        blockedHours: hours,
+        ...(!p.timeRange ? { timeRange: { startHour: s, endHour: e } } : {}),
+      }));
     }
     setStep(s => s + 1);
   };
@@ -758,20 +954,19 @@ export default function Booking() {
         <div className="bk-step-wrap" key={step}>
           {step === 1 && <PackageStep booking={booking} setBooking={setBooking} />}
           {step === 2 && <CalendarStep value={booking.date} onChange={d => setBooking(p => ({ ...p, date: d, timeRange: null }))} />}
-          {step === 3 && <TimeStep booking={booking} setBooking={setBooking} />}
+          {step === 3 && <TimeStep booking={booking} setBooking={setBooking} blockedHours={booking.blockedHours} />}
           {step === 4 && <ContactStep booking={booking} setBooking={setBooking} />}
           {step === 5 && <ReceiptStep booking={booking} />}
           {step === 6 && <ContractStep booking={booking} setBooking={setBooking} />}
-          {step === 7 && <PaymentStep booking={booking} />}
+          {step === 7 && <PaymentStep booking={booking} onSuccess={() => setSubmitted(true)} />}
         </div>
 
         <div className="bk-nav">
           {step > 1 && <Button variant="ghost" onClick={() => setStep(s => s - 1)}>Back</Button>}
           <div style={{ flex: 1 }} />
-          {step < 5 && <Button variant="primary" onClick={goNext} disabled={!canNext()}>{step === 4 ? 'Review booking' : 'Continue'}</Button>}
+          {step < 5 && <Button variant="primary" onClick={goNext} disabled={!canNext() || calLoading}>{step === 2 && calLoading ? 'Loading…' : step === 4 ? 'Review booking' : 'Continue'}</Button>}
           {step === 5 && <Button variant="primary" onClick={goNext}>Proceed to contract</Button>}
           {step === 6 && <Button variant="primary" onClick={goNext} disabled={!canNext()}>Agree and continue</Button>}
-          {step === 7 && <Button variant="accent" onClick={() => setSubmitted(true)}>Pay RM200 deposit</Button>}
         </div>
       </div>
 

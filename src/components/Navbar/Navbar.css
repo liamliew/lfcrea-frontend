@@ -107,6 +107,51 @@
   fill: url(#ig-gradient);
 }
 
+/* ── Booking page navbar ── */
+.navbar--booking {
+  grid-template-columns: 1fr auto 1fr;
+}
+
+.navbar-booking-left {
+  justify-self: start;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  pointer-events: auto;
+}
+
+.navbar-booking-left .navbar-logo-img {
+  display: block;
+  height: 40px;
+  width: auto;
+}
+
+.navbar-booking-contact {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #25D366;
+  text-decoration: none;
+  font-size: 0.875rem;
+  font-weight: 600;
+  pointer-events: auto;
+  transition: color 0.2s ease, filter 0.2s ease;
+}
+
+.navbar-booking-contact span {
+  color: #25D366;
+  transition: color 0.2s ease;
+}
+
+.navbar-booking-contact:hover {
+  color: #5fffaa;
+  filter: drop-shadow(0 0 8px rgba(37, 211, 102, 0.85));
+}
+
+.navbar-booking-contact:hover span {
+  color: #5fffaa;
+}
+
 @media (max-width: 768px) {
   .navbar {
     padding: 16px 20px;
@@ -131,4 +176,7 @@
   .navbar-socials {
     gap: 12px;
   }
+
+  .navbar-booking-left .navbar-logo-img { height: 32px; }
+  .navbar-booking-contact span { display: none; }
 }

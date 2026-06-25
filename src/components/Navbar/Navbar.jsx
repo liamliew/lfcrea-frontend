@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { gsap } from 'gsap';
 import { getNavItems } from '../../services/navService';
 import './Navbar.css';
@@ -64,6 +64,8 @@ export default function Navbar() {
   const [socialItems, setSocialItems] = useState([]);
   const navRef = useRef(null);
   const animatedRef = useRef(false);
+  const { pathname } = useLocation();
+  const isBooking = pathname === '/booking';
 
   useEffect(() => {
     getNavItems().then(({ data }) => {
@@ -89,6 +91,42 @@ export default function Navbar() {
       { opacity: 1, y: 0, duration: 0.4, ease: 'power2.out', stagger: 0.07 }
     );
   }, [navItems, socialItems]);
+
+  if (isBooking) {
+    const nonWaSocials = socialItems.filter(i => i.label.toLowerCase() !== 'whatsapp');
+    const pageLinks = navItems.filter(i => i.label !== 'Booking');
+    return (
+      <nav ref={navRef} className="navbar navbar--booking" aria-label="Main navigation">
+        <div className="navbar-booking-left">
+          <Link to="/" aria-label="Home">
+            <img src="/lfcLogo.svg" alt="LF Creative" draggable={false} className="navbar-logo-img" />
+          </Link>
+          {pageLinks.map(item => (
+            <Link key={item.label} className="navbar-nav-link" to={item.link}>
+              {item.label}
+            </Link>
+          ))}
+        </div>
+
+        <a
+          href="https://wa.me/601166767883"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="navbar-booking-contact"
+          aria-label="Contact us on WhatsApp"
+        >
+          <IconWhatsApp />
+          <span>+6011 6676 7883</span>
+        </a>
+
+        <div className="navbar-socials">
+          {nonWaSocials.map(item => (
+            <SocialLink key={item.label} item={item} />
+          ))}
+        </div>
+      </nav>
+    );
+  }
 
   return (
     <nav ref={navRef} className="navbar" aria-label="Main navigation">
