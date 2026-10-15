@@ -1,0 +1,34 @@
+/* Degrade decoration only; never hide content */
+:root[data-quality='medium'] *,
+:root[data-quality='medium'] *::before,
+:root[data-quality='medium'] *::after,
+:root[data-quality='low'] *,
+:root[data-quality='low'] *::before,
+:root[data-quality='low'] *::after {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+  transition-duration: 0.1s !important;
+  transition-delay: 0s !important;
+}
+
+:root[data-quality='medium'] .pc-behind,
+:root[data-quality='low'] .pc-behind {
+  filter: none !important;
+}
+
+:root[data-quality='medium'] .spotlight-card,
+:root[data-quality='medium'] .item-wrapper > .item-img,
+:root[data-quality='medium'] .viewer .enlarge,
+:root[data-quality='medium'] .pc-card,
+:root[data-quality='low'] .spotlight-card,
+:root[data-quality='low'] .item-wrapper > .item-img,
+:root[data-quality='low'] .viewer .enlarge,
+:root[data-quality='low'] .pc-card {
+  box-shadow: none !important;
+}
+
+:root[data-quality='low'] .pc-card,
+:root[data-quality='low'] .pc-shine,
+:root[data-quality='low'] .portfolio-skeleton-card {
+  animation: none !important;
+}

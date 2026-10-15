@@ -18,6 +18,7 @@ export function loadCategories() {
           file: img.file,
           thumb: toUrl(img.thumb),
           full: toUrl(img.full),
+          original: toUrl(`portfolio/${cat.name}/${img.file}`),
         })),
       }))
     )
@@ -32,7 +33,7 @@ export function toMasonryItems(entries, onProgress) {
   let done = 0;
   return Promise.all(
     entries.map(
-      ({ id, thumb, full, label, to }) =>
+      ({ id, thumb, full, original, label, to }) =>
         new Promise((resolve) => {
           const el = new Image();
           el.onload = el.onerror = () => {
@@ -41,6 +42,7 @@ export function toMasonryItems(entries, onProgress) {
               id,
               img: thumb,
               url: full ?? thumb,
+              original,
               label,
               to,
               height: el.naturalWidth ? (el.naturalHeight / el.naturalWidth) * 600 : 400,

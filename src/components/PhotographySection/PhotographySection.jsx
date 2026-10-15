@@ -15,7 +15,7 @@ export default function PhotographySection() {
     <section className="photography-section">
       <div className="photography-content">
         <div className="photography-text">
-          <h2 className="sub-header photography-header">Photography</h2>
+          <h2 className="photography-header">Photography</h2>
           <ul className="photography-list">
             {SERVICES.map((service) => (
               <li key={service} className="photography-item">{service}</li>

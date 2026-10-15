@@ -1,6 +1,21 @@
+@font-face {
+  font-family: 'KH Interference';
+  src: url('/KHInterference-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'KH Interference';
+  src: url('/KHInterference-Light.woff2') format('woff2');
+  font-weight: 300;
+  font-style: normal;
+}
+
 .team-section {
+  position: relative;
   background-color: black;
-  padding: 2rem 1rem;
+  padding: 80px 2rem;
   font-family: 'Figtree', sans-serif;
   color: white;
   display: flex;
@@ -9,135 +24,243 @@
   width: 100%;
 }
 
-@media (min-width: 768px) {
-  .team-section {
-    padding: 3rem 2rem;
-  }
+.team-section::before,
+.team-section::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1px;
+  pointer-events: none;
+  background: linear-gradient(
+    to right,
+    transparent,
+    rgba(255, 255, 255, 0.25) 15%,
+    rgba(255, 255, 255, 0.25) 85%,
+    transparent
+  );
+}
+
+.team-section::before {
+  top: 80px;
+}
+
+.team-section::after {
+  bottom: 80px;
 }
 
 .team-container {
   max-width: 1200px;
   width: 100%;
   margin: 0 auto;
+  padding: 40px 0;
+  position: relative;
 }
 
-.team-header {
-  text-align: center;
-  max-width: 768px;
-  margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+.team-container::before,
+.team-container::after {
+  content: '';
+  position: absolute;
+  top: -40px;
+  bottom: -40px;
+  width: 1px;
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    rgba(255, 255, 255, 0.25) 40px,
+    rgba(255, 255, 255, 0.25) calc(100% - 40px),
+    transparent
+  );
 }
 
-.team-badge {
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: white;
-  margin-bottom: 0.75rem;
+.team-container::before {
+  left: 0;
+  top: -80px;
+  background: linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.25) calc(100% - 40px),
+    transparent
+  );
 }
 
-@media (min-width: 768px) {
-  .team-badge {
-    font-size: 1rem;
-  }
+.team-container::after {
+  right: 0;
+  top: -80px;
+  background: linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.25) calc(100% - 40px),
+    transparent
+  );
 }
 
 .team-title {
-  font-size: 2.5rem;
-  font-weight: 600;
-  margin: 0;
+  font-family: 'KH Interference', sans-serif;
+  font-weight: 700;
+  font-size: clamp(3rem, 8vw, 6.5rem);
+  line-height: 0.9;
+  text-transform: uppercase;
+  text-align: center;
   color: white;
+  margin: 0 0 1.5rem;
 }
 
-@media (min-width: 768px) {
-  .team-title {
-    font-size: 3rem;
-  }
-}
-
-.team-subtitle {
-  margin-top: 1rem;
-  font-size: 1.125rem;
-  color: rgba(255, 255, 255, 0.7);
-}
-
-@media (min-width: 768px) {
-  .team-subtitle {
-    margin-top: 1.25rem;
-    font-size: 1.25rem;
-  }
-}
-
-.team-grid-wrapper {
+.team-cards {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1.5rem;
   margin-top: 3rem;
 }
 
 @media (min-width: 768px) {
-  .team-grid-wrapper {
+  .team-cards {
     margin-top: 4rem;
   }
 }
 
-.team-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  justify-items: center;
-  gap: 3rem 2rem;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-@media (min-width: 640px) {
-  .team-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-.team-item {
+.spotlight-card.team-card {
+  width: 100%;
+  max-width: 320px;
+  position: relative;
+  padding: 4rem 1.5rem 3rem;
+  border-radius: 0.5rem;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1rem;
+  text-align: center;
 }
 
-@media (min-width: 768px) {
-  .team-item {
-    gap: 1.25rem;
-  }
-}
-
-.team-avatar {
-  width: 80px;
-  height: 80px;
+.team-photo {
+  width: 112px;
+  height: 112px;
   border-radius: 9999px;
   object-fit: cover;
   background-color: white;
   border: 2px solid rgba(255, 255, 255, 0.1);
 }
 
-@media (min-width: 768px) {
-  .team-avatar {
-    width: 96px;
-    height: 96px;
-  }
-}
-
-.team-info {
-  text-align: center;
-}
-
 .team-name {
-  font-size: 1.125rem;
+  margin: 1rem 0 0;
+  font-size: 1.25rem;
   font-weight: 600;
-  color: white;
-  margin: 0;
 }
 
-.team-role {
-  font-size: 1rem;
-  color: white;
+.team-position {
+  margin: 0.25rem 0 0;
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.team-skill {
+  margin-top: 1rem;
+  padding: 0.2rem 0.4rem;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 0;
+  background: rgba(255, 255, 255, 0.05);
+  font-family: 'KH Interference', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 300;
+}
+
+.team-tools {
+  display: flex;
+  gap: 0.5rem;
+  margin: 1rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.team-tool {
+  position: relative;
+  width: 36px;
+  height: 36px;
+}
+
+.team-tool-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.team-tool-award {
+  position: absolute;
+  bottom: -6px;
+  right: -6px;
+  color: #fff;
+}
+
+.team-cert {
+  position: absolute;
+  top: 1rem;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  text-align: left;
+}
+
+.team-cert-logo {
+  width: 28px;
+  height: 28px;
+  filter: brightness(0) invert(1);
+}
+
+.team-cert-text {
   margin: 0;
+  font-family: 'KH Interference', sans-serif;
+  font-weight: 400;
+  font-size: 0.7rem;
+  line-height: 1.2;
+  letter-spacing: 0.08em;
+}
+
+.team-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  width: 100%;
+  margin: 1.5rem 0 0;
+  padding-top: 1.25rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.team-stat dd {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 600;
+}
+
+.team-stat dt {
+  order: 2;
   margin-top: 0.25rem;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.team-stat {
+  display: flex;
+  flex-direction: column;
+}
+
+.team-profile-btn {
+  margin-top: 1.5rem;
+  padding: 0.6rem 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  color: #fff;
+  font-family: 'KH Interference', sans-serif;
+  font-weight: 400;
+  font-size: 0.85rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.team-profile-btn:hover {
+  background: #fff;
+  color: #000;
 }

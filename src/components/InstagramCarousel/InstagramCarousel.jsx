@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { gsap } from 'gsap';
 import { getInstagramPosts } from '../../services/instagramService';
 import { mediaUrl } from '../../lib/mediaUrl';
+import { useQualityTier } from '../../lib/useQualityTier';
 import './InstagramCarousel.css';
 
 function InstagramIcon() {
@@ -38,6 +39,7 @@ export default function InstagramCarousel() {
   const [posts, setPosts] = useState([]);
   const trackRef = useRef(null);
   const tweenRef = useRef(null);
+  const tier = useQualityTier();
 
   useEffect(() => {
     getInstagramPosts().then(({ data }) => {
@@ -65,8 +67,15 @@ export default function InstagramCarousel() {
     };
   }, [posts]);
 
+  useEffect(() => {
+    if (tier === 'low') tweenRef.current?.pause();
+    else tweenRef.current?.resume();
+  }, [tier, posts]);
+
   const handleMouseEnter = useCallback(() => tweenRef.current?.pause(), []);
-  const handleMouseLeave = useCallback(() => tweenRef.current?.resume(), []);
+  const handleMouseLeave = useCallback(() => {
+    if (tier !== 'low') tweenRef.current?.resume();
+  }, [tier]);
 
   if (!posts.length) return null;
 

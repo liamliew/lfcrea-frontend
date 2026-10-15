@@ -7,7 +7,7 @@
 
 .photography-content {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 3rem;
   max-width: 1200px;
@@ -16,11 +16,17 @@
 
 .photography-text {
   flex: 1;
-  text-align: left;
+  text-align: right;
 }
 
 .photography-header {
-  text-align: left;
+  font-family: 'KH Interference', sans-serif;
+  font-weight: 700;
+  font-size: clamp(3rem, 8vw, 6.5rem);
+  line-height: 0.9;
+  text-transform: uppercase;
+  text-align: right;
+  color: white;
   margin: 0 0 1.5rem;
 }
 
@@ -40,11 +46,13 @@
 }
 
 .photography-img {
-  width: min(480px, 45%);
-  aspect-ratio: 4 / 5;
+  width: 320px;
+  height: 440px;
+  margin-right: 3rem;
   flex-shrink: 0;
   object-fit: cover;
-  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  box-sizing: border-box;
 }
 
 @media (max-width: 768px) {
@@ -60,5 +68,7 @@
 
   .photography-img {
     width: 100%;
+    height: 320px;
+    margin-right: 0;
   }
 }

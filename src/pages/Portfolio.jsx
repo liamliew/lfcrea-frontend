@@ -60,7 +60,7 @@ export default function Portfolio() {
       )}
       {status === 'ready' && (
         <div className="pf-masonry">
-          <Masonry items={items} onItemClick={(item) => navigate(item.to)} />
+          <Masonry items={items} animateFrom="bottom" stagger={0.12} onItemClick={(item) => navigate(item.to)} />
         </div>
       )}
     </div>

@@ -204,3 +204,20 @@ main.sphere-main {
 .edge-fade--bottom {
     bottom: 0;
 }
+
+.dome-loading {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 150px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 0;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  pointer-events: none;
+  z-index: 2;
+}

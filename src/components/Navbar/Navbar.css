@@ -12,6 +12,18 @@
   pointer-events: none;
 }
 
+.navbar::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 120px;
+  z-index: -1;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.75), transparent);
+  pointer-events: none;
+}
+
 .navbar-logo {
   justify-self: start;
   pointer-events: auto;

@@ -1,8 +1,13 @@
 import { useEffect, useMemo, useRef, useCallback } from 'react';
+import { createRoot } from 'react-dom/client';
 import { useGesture } from '@use-gesture/react';
+import LatticeLoader from './LatticeLoader';
 import './DomeGallery.css';
 
 const MEDIA_BASE = (import.meta.env.VITE_MEDIA_URL ?? '').replace(/\/$/, '');
+
+// Bump to bypass stale CDN cache
+const TILE_VERSION = 2;
 
 const DOME_FILES = [
     '20251115-IMG_9238-Enhanced-NR.jpg',
@@ -19,10 +24,65 @@ const DOME_FILES = [
 ];
 
 const DEFAULT_IMAGES = DOME_FILES.map(filename => ({
-    src: `${MEDIA_BASE}/domegalleryCollection/thumbnails/${filename}`,
+    src: `${MEDIA_BASE}/domegalleryCollection/tiles/${filename.replace(/\.[^.]+$/, '')}.webp?v=${TILE_VERSION}`,
     fullSrc: `${MEDIA_BASE}/domegalleryCollection/${filename}`,
     alt: filename
 }));
+
+const originalCache = new Map();
+
+function loadOriginalWithProgress(overlay, img, url) {
+    const cached = originalCache.get(url);
+    if (cached) {
+        img.src = cached;
+        return;
+    }
+
+    const holder = document.createElement('div');
+    holder.className = 'dome-loading';
+    overlay.appendChild(holder);
+    const root = createRoot(holder);
+    const show = label => root.render(<LatticeLoader label={label} showTimer={false} />);
+    show('Loading');
+
+    const controller = new AbortController();
+    const cleanup = () => {
+        holder.remove();
+        setTimeout(() => root.unmount());
+    };
+
+    (async () => {
+        try {
+            const res = await fetch(url, { signal: controller.signal });
+            if (!res.ok || !res.body) throw new Error('Download failed');
+            const total = Number(res.headers.get('content-length')) || 0;
+            const reader = res.body.getReader();
+            const chunks = [];
+            let received = 0;
+            for (;;) {
+                if (!overlay.isConnected) {
+                    controller.abort();
+                    cleanup();
+                    return;
+                }
+                const { done, value } = await reader.read();
+                if (done) break;
+                chunks.push(value);
+                received += value.length;
+                if (total) show(`${Math.min(100, Math.round((received / total) * 100))}%`);
+            }
+            const objectUrl = URL.createObjectURL(
+                new Blob(chunks, { type: res.headers.get('content-type') ?? 'image/jpeg' })
+            );
+            originalCache.set(url, objectUrl);
+            if (overlay.isConnected) img.src = objectUrl;
+            cleanup();
+        } catch (err) {
+            if (err.name !== 'AbortError' && overlay.isConnected) img.src = url;
+            cleanup();
+        }
+    })();
+}
 
 const DEFAULTS = {
     maxVerticalRotationDeg: 5,
@@ -531,9 +591,10 @@ export default function DomeGallery({
             overlay.style.transition = `transform ${enlargeTransitionMs}ms ease, opacity ${enlargeTransitionMs}ms ease`;
             const rawSrc = parent.dataset.src || el.querySelector('img')?.src || '';
             const img = document.createElement('img');
-            img.src = rawSrc;
+            img.src = el.querySelector('img')?.src || rawSrc;
             overlay.appendChild(img);
             viewerRef.current.appendChild(overlay);
+            if (rawSrc) loadOriginalWithProgress(overlay, img, rawSrc);
             const tx0 = tileR.left - frameR.left;
             const ty0 = tileR.top - frameR.top;
             const sx0 = tileR.width / frameR.width;

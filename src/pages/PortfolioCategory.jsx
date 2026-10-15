@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import Masonry from '../components/Masonry';
+import Lightbox from '../components/Lightbox';
 import LatticeLoader from '../components/LatticeLoader';
 import { loadCategories, toMasonryItems } from '../services/portfolioAssets';
 import './Portfolio.css';
 
 function CategoryView({ category }) {
   const [items, setItems] = useState([]);
+  const [selected, setSelected] = useState(null);
   const [status, setStatus] = useState('loading');
   const [progress, setProgress] = useState({ done: 0, total: 0 });
 
@@ -17,7 +19,7 @@ function CategoryView({ category }) {
         const cat = categories.find((c) => c.slug === encodeURIComponent(category));
         if (!cat) return null;
         return toMasonryItems(
-          cat.images.map((img) => ({ id: img.file, thumb: img.thumb, full: img.full })),
+          cat.images.map((img) => ({ id: img.file, thumb: img.thumb, full: img.full, original: img.original })),
           (done, total) => { if (!cancelled) setProgress({ done, total }); }
         );
       })
@@ -53,8 +55,16 @@ function CategoryView({ category }) {
       )}
       {status === 'ready' && (
         <div className="pf-masonry">
-          <Masonry items={items} />
+          <Masonry items={items} animateFrom="bottom" stagger={0.12} onItemClick={setSelected} />
         </div>
+      )}
+      {selected && (
+        <Lightbox
+          preview={selected.url}
+          original={selected.original}
+          alt={`${category} ${selected.id}`}
+          onClose={() => setSelected(null)}
+        />
       )}
     </div>
   );

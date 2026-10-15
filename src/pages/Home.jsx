@@ -1,15 +1,15 @@
-import { useState, useEffect, lazy, Suspense } from 'react'
-import PageLoader from '../components/PageLoader'
+import { useState, useEffect } from 'react'
+import GradualBlur from '../components/GradualBlur'
 import { Link } from 'react-router-dom'
 import DomeGallery from '../components/DomeGallery'
 import GradientText from '../components/GradientText'
 import TeamSection from '../components/TeamSection'
+import TestimonialsSection from '../components/TestimonialsSection'
 import FAQSimple from '../components/FAQSimple'
 import InstagramCarousel from '../components/InstagramCarousel/InstagramCarousel'
 import AboutUs from '../components/AboutUs/AboutUs'
 import PhotographySection from '../components/PhotographySection/PhotographySection'
-
-const PortfolioGrid = lazy(() => import('../components/Portfolio/PortfolioGrid'));
+import './Home.css'
 
 const HERO_GRADIENT_COLORS = ['#5227FF', '#FF9FFC', '#B19EEF'];
 
@@ -26,6 +26,7 @@ export default function Home() {
 
   return (
     <div className="app-container">
+      <GradualBlur target="page" position="top" height="6rem" strength={2} divCount={5} curve="bezier" zIndex={800} />
 <div className="section first-section">
         <DomeGallery
           fit={0.6}
@@ -62,14 +63,16 @@ export default function Home() {
           </div>
         </div>
       </div>
-<AboutUs />
-      <PhotographySection />
-      <InstagramCarousel />
-      <Suspense fallback={<PageLoader />}>
-        <PortfolioGrid />
-      </Suspense>
-      <TeamSection />
-      <FAQSimple />
+      <div className="home-lower">
+        <div className="home-upper-lines">
+          <AboutUs />
+          <PhotographySection />
+        </div>
+        <InstagramCarousel />
+        <TestimonialsSection />
+        <TeamSection />
+        <FAQSimple />
+      </div>
     </div>
   )
 }

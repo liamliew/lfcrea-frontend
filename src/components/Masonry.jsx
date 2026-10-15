@@ -52,6 +52,8 @@ const preloadImages = async urls => {
   );
 };
 
+const ENTRY_DISTANCE = 160;
+
 const Masonry = ({
   items,
   ease = 'power3.out',
@@ -73,33 +75,23 @@ const Masonry = ({
   const [containerRef, { width }] = useMeasure();
   const [imagesReady, setImagesReady] = useState(false);
 
-  const getInitialPosition = item => {
-    const containerRect = containerRef.current?.getBoundingClientRect();
-    if (!containerRect) return { x: item.x, y: item.y };
-
+  const getEntryOffset = () => {
     let direction = animateFrom;
-
     if (animateFrom === 'random') {
       const directions = ['top', 'bottom', 'left', 'right'];
       direction = directions[Math.floor(Math.random() * directions.length)];
     }
-
     switch (direction) {
       case 'top':
-        return { x: item.x, y: -200 };
-      case 'bottom':
-        return { x: item.x, y: window.innerHeight + 200 };
+        return { x: 0, y: -ENTRY_DISTANCE };
       case 'left':
-        return { x: -200, y: item.y };
+        return { x: -ENTRY_DISTANCE, y: 0 };
       case 'right':
-        return { x: window.innerWidth + 200, y: item.y };
+        return { x: ENTRY_DISTANCE, y: 0 };
       case 'center':
-        return {
-          x: containerRect.width / 2 - item.w / 2,
-          y: containerRect.height / 2 - item.h / 2
-        };
+        return { x: 0, y: 0 };
       default:
-        return { x: item.x, y: item.y + 100 };
+        return { x: 0, y: ENTRY_DISTANCE };
     }
   };
 
@@ -127,52 +119,56 @@ const Masonry = ({
 
   const gridHeight = grid.reduce((max, item) => Math.max(max, item.y + item.h), 0);
 
-  const hasMounted = useRef(false);
+  const positioned = useRef(false);
+  const entered = useRef(false);
 
+  // Positions only; the entrance animates the inner image so resizes never interrupt it
   useLayoutEffect(() => {
-    if (!imagesReady) return;
+    if (!grid.length) return;
 
-    grid.forEach((item, index) => {
+    grid.forEach(item => {
       const selector = `[data-key="${item.id}"]`;
-      const animationProps = {
-        x: item.x,
-        y: item.y,
-        width: item.w,
-        height: item.h
-      };
+      const props = { x: item.x, y: item.y, width: item.w, height: item.h };
 
-      if (!hasMounted.current) {
-        const initialPos = getInitialPosition(item, index);
-        const initialState = {
-          opacity: 0,
-          x: initialPos.x,
-          y: initialPos.y,
-          width: item.w,
-          height: item.h,
-          ...(blurToFocus && { filter: 'blur(10px)' })
-        };
-
-        gsap.fromTo(selector, initialState, {
-          opacity: 1,
-          ...animationProps,
-          ...(blurToFocus && { filter: 'blur(0px)' }),
-          duration: 0.8,
-          ease: 'power3.out',
-          delay: index * stagger
-        });
+      if (!positioned.current) {
+        gsap.set(selector, props);
       } else {
-        gsap.to(selector, {
-          ...animationProps,
-          duration: duration,
-          ease: ease,
-          overwrite: 'auto'
-        });
+        gsap.to(selector, { ...props, duration, ease, overwrite: 'auto' });
       }
     });
 
-    hasMounted.current = true;
+    positioned.current = true;
+  }, [grid, duration, ease]);
+
+  useLayoutEffect(() => {
+    if (!imagesReady || !grid.length || entered.current) return;
+    entered.current = true;
+
+    grid.forEach((item, index) => {
+      const offset = getEntryOffset();
+      gsap.fromTo(
+        `[data-key="${item.id}"] .item-img`,
+        {
+          opacity: 0,
+          x: offset.x,
+          y: offset.y,
+          scale: animateFrom === 'center' ? 0.6 : 1,
+          ...(blurToFocus && { filter: 'blur(10px)' })
+        },
+        {
+          opacity: 1,
+          x: 0,
+          y: 0,
+          scale: 1,
+          ...(blurToFocus && { filter: 'blur(0px)' }),
+          duration: 0.7 + Math.random() * 0.5,
+          ease: 'power3.out',
+          delay: index * stagger + Math.random() * 0.35
+        }
+      );
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [grid, imagesReady, stagger, animateFrom, blurToFocus, duration, ease]);
+  }, [grid, imagesReady]);
 
   const handleMouseEnter = (e, item) => {
     const element = e.currentTarget;
@@ -234,7 +230,7 @@ const Masonry = ({
             onMouseEnter={e => handleMouseEnter(e, item)}
             onMouseLeave={e => handleMouseLeave(e, item)}
           >
-            <div className="item-img" style={{ backgroundImage: `url(${item.img})` }}>
+            <div className="item-img" style={{ backgroundImage: `url(${item.img})`, opacity: 0 }}>
               {colorShiftOnHover && (
                 <div
                   className="color-overlay"

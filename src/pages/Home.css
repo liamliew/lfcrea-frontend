@@ -1,0 +1,32 @@
+/* Vertical grid line running from below the dome to the footer */
+.home-lower {
+  position: relative;
+}
+
+.home-upper-lines {
+  position: relative;
+}
+
+.home-upper-lines::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(50% + min(600px, 50% - 2rem));
+  width: 1px;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    rgba(255, 255, 255, 0.25) 6%,
+    rgba(255, 255, 255, 0.25) 94%,
+    transparent
+  );
+}
+
+@media (max-width: 768px) {
+  .home-upper-lines::before {
+    display: none;
+  }
+}

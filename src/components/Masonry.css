@@ -2,6 +2,8 @@
   position: relative;
   width: 100%;
   height: 100%;
+  overflow: clip;
+  overflow-clip-margin: 60px;
 }
 
 .item-wrapper {
