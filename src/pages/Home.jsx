@@ -1,4 +1,5 @@
 import { useState, useEffect, lazy, Suspense } from 'react'
+import PageLoader from '../components/PageLoader'
 import { Link } from 'react-router-dom'
 import DomeGallery from '../components/DomeGallery'
 import GradientText from '../components/GradientText'
@@ -6,6 +7,7 @@ import TeamSection from '../components/TeamSection'
 import FAQSimple from '../components/FAQSimple'
 import InstagramCarousel from '../components/InstagramCarousel/InstagramCarousel'
 import AboutUs from '../components/AboutUs/AboutUs'
+import PhotographySection from '../components/PhotographySection/PhotographySection'
 
 const PortfolioGrid = lazy(() => import('../components/Portfolio/PortfolioGrid'));
 
@@ -61,8 +63,9 @@ export default function Home() {
         </div>
       </div>
 <AboutUs />
+      <PhotographySection />
       <InstagramCarousel />
-      <Suspense fallback={<div style={{ minHeight: '400px' }} />}>
+      <Suspense fallback={<PageLoader />}>
         <PortfolioGrid />
       </Suspense>
       <TeamSection />

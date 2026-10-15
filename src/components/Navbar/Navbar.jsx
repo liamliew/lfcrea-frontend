@@ -59,6 +59,21 @@ function SocialLink({ item }) {
   );
 }
 
+function WhatsAppContact() {
+  return (
+    <a
+      href="https://wa.me/601166767883"
+      target="_blank"
+      rel="noopener noreferrer"
+      className="navbar-booking-contact"
+      aria-label="Contact us on WhatsApp"
+    >
+      <IconWhatsApp />
+      <span>+6011 6676 7883</span>
+    </a>
+  );
+}
+
 export default function Navbar() {
   const [navItems, setNavItems] = useState([]);
   const [socialItems, setSocialItems] = useState([]);
@@ -108,16 +123,7 @@ export default function Navbar() {
           ))}
         </div>
 
-        <a
-          href="https://wa.me/601166767883"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="navbar-booking-contact"
-          aria-label="Contact us on WhatsApp"
-        >
-          <IconWhatsApp />
-          <span>+6011 6676 7883</span>
-        </a>
+        <WhatsAppContact />
 
         <div className="navbar-socials">
           {nonWaSocials.map(item => (
@@ -157,9 +163,13 @@ export default function Navbar() {
       </ul>
 
       <div className="navbar-socials">
-        {socialItems.map((item) => (
-          <SocialLink key={item.label} item={item} />
-        ))}
+        {socialItems.map((item) =>
+          item.label.toLowerCase() === 'whatsapp' ? (
+            <WhatsAppContact key={item.label} />
+          ) : (
+            <SocialLink key={item.label} item={item} />
+          )
+        )}
       </div>
     </nav>
   );
