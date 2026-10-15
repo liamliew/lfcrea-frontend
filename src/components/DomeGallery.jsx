@@ -2,18 +2,27 @@ import { useEffect, useMemo, useRef, useCallback } from 'react';
 import { useGesture } from '@use-gesture/react';
 import './DomeGallery.css';
 
-const imageModules = import.meta.glob('/src/assets/domegalleryCollection/*.{jpg,jpeg,png,webp,svg}', {eager: true});
-const thumbModules = import.meta.glob('/src/assets/domegalleryCollection/thumbnails/*.{jpg,jpeg,png,webp,svg}', {eager: true});
+const MEDIA_BASE = (import.meta.env.VITE_MEDIA_URL ?? '').replace(/\/$/, '');
 
-const DEFAULT_IMAGES = Object.keys(imageModules).map(key => {
-    const filename = key.split('/').pop();
-    const thumbKey = `/src/assets/domegalleryCollection/thumbnails/${filename}`;
-    return {
-        src: thumbModules[thumbKey] ? thumbModules[thumbKey].default : imageModules[key].default,
-        fullSrc: imageModules[key].default,
-        alt: filename
-    };
-});
+const DOME_FILES = [
+    '20251115-IMG_9238-Enhanced-NR.jpg',
+    '20251115-IMG_9418.jpg',
+    '20251115-JAS_0950-Enhanced-NR.jpg',
+    '20251115-JAS_1059-Enhanced-NR.jpg',
+    '20251116-IMG_9177.jpg',
+    '20260213-IMG_0257.jpg',
+    '20260213-IMG_0492-2.jpg',
+    '20260213-IMG_0811.jpg',
+    '20260220-IMG_0012.jpg',
+    '20260220-IMG_0051.jpg',
+    '20260220-IMG_0057.jpg'
+];
+
+const DEFAULT_IMAGES = DOME_FILES.map(filename => ({
+    src: `${MEDIA_BASE}/domegalleryCollection/thumbnails/${filename}`,
+    fullSrc: `${MEDIA_BASE}/domegalleryCollection/${filename}`,
+    alt: filename
+}));
 
 const DEFAULTS = {
     maxVerticalRotationDeg: 5,

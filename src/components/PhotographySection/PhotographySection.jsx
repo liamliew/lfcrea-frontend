@@ -1,5 +1,6 @@
-import photo from '../../assets/homePhotos/photography.jpg';
 import './PhotographySection.css';
+
+const PHOTO_URL = `${(import.meta.env.VITE_MEDIA_URL ?? '').replace(/\/$/, '')}/homePhotos/photography-preview.webp`;
 
 const SERVICES = [
   'Corporate Event',
@@ -22,7 +23,7 @@ export default function PhotographySection() {
           </ul>
         </div>
         <img
-          src={photo}
+          src={PHOTO_URL}
           alt="Photography"
           className="photography-img"
           draggable={false}

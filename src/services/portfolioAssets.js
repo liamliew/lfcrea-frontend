@@ -1,46 +1,52 @@
-const modules = import.meta.glob(
-  '/src/assets/portfolio/*/*.{jpg,jpeg,png,webp}',
-  { eager: true, query: '?url', import: 'default' }
-);
+const BASE = (import.meta.env.VITE_MEDIA_URL ?? '').replace(/\/$/, '');
 
-const byCategory = {};
-for (const [path, url] of Object.entries(modules)) {
-  const [, , , , folder, file] = path.split('/');
-  (byCategory[folder] ??= []).push({ file, url });
-}
+const toUrl = (key) => `${BASE}/${key.split('/').map(encodeURIComponent).join('/')}`;
 
-export const categories = Object.keys(byCategory)
-  .sort((a, b) => a.localeCompare(b))
-  .map((name) => {
-    const images = byCategory[name].sort((a, b) =>
-      a.file.localeCompare(b.file, undefined, { numeric: true })
-    );
-    return { name, slug: encodeURIComponent(name), images };
-  });
+let cache;
 
-export function getCategory(slug) {
-  return categories.find((c) => c.slug === slug);
+export function loadCategories() {
+  cache ??= fetch(`${BASE}/portfolio/manifest.json`)
+    .then((res) => {
+      if (!res.ok) throw new Error(`Manifest request failed: ${res.status}`);
+      return res.json();
+    })
+    .then((data) =>
+      data.categories.map((cat) => ({
+        name: cat.name,
+        slug: encodeURIComponent(cat.name),
+        images: cat.images.map((img) => ({
+          file: img.file,
+          thumb: toUrl(img.thumb),
+          full: toUrl(img.full),
+        })),
+      }))
+    )
+    .catch((err) => {
+      cache = undefined;
+      throw err;
+    });
+  return cache;
 }
 
 export function toMasonryItems(entries, onProgress) {
   let done = 0;
   return Promise.all(
     entries.map(
-      ({ id, url, label, to }) =>
+      ({ id, thumb, full, label, to }) =>
         new Promise((resolve) => {
           const el = new Image();
           el.onload = el.onerror = () => {
             onProgress?.(++done, entries.length);
             resolve({
               id,
-              img: url,
-              url,
+              img: thumb,
+              url: full ?? thumb,
               label,
               to,
               height: el.naturalWidth ? (el.naturalHeight / el.naturalWidth) * 600 : 400,
             });
           };
-          el.src = url;
+          el.src = thumb;
         })
     )
   );
