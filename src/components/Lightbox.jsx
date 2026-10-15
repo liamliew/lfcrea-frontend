@@ -1,11 +1,40 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ModalOverlay, Modal, Dialog } from 'react-aria-components';
 import LatticeLoader from './LatticeLoader';
+import { loadCorsImage, logoTone, regionTone, shouldInvert } from '../lib/watermarkContrast';
 import './Lightbox.css';
 
-export default function Lightbox({ preview, original, alt, onClose }) {
+export default function Lightbox({ preview, original, alt, fileName, watermark, onClose }) {
   const [src, setSrc] = useState(null);
   const [percent, setPercent] = useState(null);
+  const [invert, setInvert] = useState(false);
+  const [previewReady, setPreviewReady] = useState(false);
+  const [markReady, setMarkReady] = useState(false);
+  const previewRef = useRef(null);
+  const markRef = useRef(null);
+
+  useEffect(() => {
+    if (!watermark || !previewReady || !markReady) return undefined;
+    let cancelled = false;
+    Promise.all([loadCorsImage(preview), loadCorsImage(watermark)]).then(([photo, logo]) => {
+      const photoEl = previewRef.current;
+      const markEl = markRef.current;
+      if (cancelled || !photo || !logo || !photoEl || !markEl) return;
+      const pr = photoEl.getBoundingClientRect();
+      const mr = markEl.getBoundingClientRect();
+      const scale = photo.naturalWidth / Math.max(1, pr.width);
+      const pad = 8;
+      const corner = regionTone(
+        photo,
+        (mr.left - pr.left - pad) * scale,
+        (mr.top - pr.top - pad) * scale,
+        (mr.width + pad * 2) * scale,
+        (mr.height + pad * 2) * scale
+      );
+      setInvert(shouldInvert(logoTone(logo), corner));
+    });
+    return () => { cancelled = true; };
+  }, [watermark, preview, previewReady, markReady]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -47,14 +76,32 @@ export default function Lightbox({ preview, original, alt, onClose }) {
       className="lightbox-overlay"
     >
       <Modal className="lightbox-modal">
+        <div className="lightbox-backdrop" onClick={onClose} aria-hidden="true" />
         <Dialog className="lightbox-dialog" aria-label={alt}>
           <button className="lightbox-close" onClick={onClose} aria-label="Close">
             ×
           </button>
-          <img src={preview} alt={alt} className="lightbox-img" />
+          <img
+            ref={previewRef}
+            src={preview}
+            alt={alt}
+            className="lightbox-img"
+            onLoad={() => setPreviewReady(true)}
+          />
           {src && (
             <img src={src} alt={alt} className="lightbox-img lightbox-img--original" />
           )}
+          {watermark && (
+            <img
+              ref={markRef}
+              src={watermark}
+              alt=""
+              className={`lightbox-watermark${invert ? ' is-inverted' : ''}`}
+              draggable={false}
+              onLoad={() => setMarkReady(true)}
+            />
+          )}
+          {fileName && <span className="lightbox-caption">{fileName}</span>}
           {!src && (
             <span className="lightbox-status">
               <LatticeLoader

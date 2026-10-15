@@ -86,9 +86,9 @@ const SpotlightCard = ({
     grain: tier === 'high' ? clamp(grain, 0, 1) : 0
   };
   const settingsRef = useRef(settings);
-  settingsRef.current = settings;
 
   useEffect(() => {
+    settingsRef.current = settings;
     wakeRef.current?.();
   });
 

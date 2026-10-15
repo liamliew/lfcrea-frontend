@@ -1,0 +1,83 @@
+.service-page {
+  min-height: 100vh;
+  background: black;
+  color: white;
+}
+
+.service-heading {
+  font-family: 'KH Interference', sans-serif;
+  width: 100%;
+}
+
+.service-heading .particle-text {
+  height: 480px;
+  -webkit-mask-image:
+    linear-gradient(to right, transparent, #000 10%, #000 90%, transparent),
+    linear-gradient(to bottom, #000 75%, transparent);
+  -webkit-mask-composite: source-in;
+  mask-image:
+    linear-gradient(to right, transparent, #000 10%, #000 90%, transparent),
+    linear-gradient(to bottom, #000 75%, transparent);
+  mask-composite: intersect;
+}
+
+.service-person {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  margin-top: -80px;
+}
+
+.service-person-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 18px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 9999px;
+  color: #fff;
+  text-decoration: none;
+  font-family: 'Figtree', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.service-person-pill:hover {
+  background: #fff;
+  color: #000;
+}
+
+.service-body {
+  position: relative;
+  max-width: 640px;
+  margin: 1.25rem auto 0;
+  padding: 0 2rem 80px;
+  text-align: center;
+  font-family: 'Figtree', sans-serif;
+  font-size: clamp(1rem, 1.8vw, 1.2rem);
+  line-height: 1.8;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.service-sr-title {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+  .service-heading .particle-text {
+    height: 60vh;
+    min-height: 420px;
+  }
+
+  .service-person {
+    margin-top: -40px;
+  }
+}

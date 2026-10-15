@@ -1,11 +1,3 @@
-@font-face {
-  font-family: 'KH Interference';
-  src: url('/KHInterference-Bold.woff2') format('woff2');
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-}
-
 .about-us-section {
   position: relative;
   background: black;
@@ -40,11 +32,29 @@
 }
 
 .about-us-content {
+  position: relative;
   display: flex;
   align-items: stretch;
   gap: 3rem;
   max-width: 1200px;
   width: 100%;
+}
+
+.about-us-content::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: -40px;
+  bottom: -40px;
+  width: 1px;
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    rgba(255, 255, 255, 0.25) 40px,
+    rgba(255, 255, 255, 0.25) calc(100% - 40px),
+    transparent
+  );
 }
 
 .about-us-img {
@@ -126,6 +136,10 @@
 }
 
 @media (max-width: 768px) {
+  .about-us-content::after {
+    display: none;
+  }
+
   .about-us-section {
     padding: 100px 1.5rem 60px;
   }

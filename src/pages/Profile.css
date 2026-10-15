@@ -1,15 +1,7 @@
-@font-face {
-  font-family: 'KH Interference';
-  src: url('/KHInterference-Regular.woff2') format('woff2');
-  font-weight: 400;
-  font-style: normal;
-}
-
 .profile-page {
   min-height: 100vh;
   background: black;
   color: white;
-  padding: 0 0 80px;
   font-family: 'Figtree', sans-serif;
 }
 
@@ -25,42 +17,57 @@
 
 .profile-lanyard {
   position: relative;
-  z-index: 1;
   height: 680px;
-  grid-area: 1 / 1;
 }
 
 .profile-info {
-  position: relative;
-  z-index: 0;
-  container-type: inline-size;
-  grid-area: 2 / 1;
-  padding: 0 2rem;
+  padding: 2rem 2rem 80px;
   text-align: left;
 }
 
 @media (min-width: 900px) {
   .profile-lanyard {
     grid-area: 1 / 1;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    align-self: start;
+    height: 100vh;
   }
 
   .profile-info {
     grid-area: 1 / 1;
-    align-self: center;
     justify-self: end;
     width: 50%;
-    padding: 0 4rem 0 2rem;
-    pointer-events: none;
+    padding: 180px 4rem 160px 2rem;
   }
+}
 
-  .profile-info a {
-    pointer-events: auto;
-  }
+.profile-cert {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.profile-cert-logo {
+  width: 40px;
+  height: 40px;
+  filter: brightness(0) invert(1);
+}
+
+.profile-cert-text {
+  margin: 0;
+  font-family: 'KH Interference', sans-serif;
+  font-weight: 400;
+  font-size: 1rem;
+  line-height: 1.2;
+  letter-spacing: 0.08em;
 }
 
 .profile-name-block {
   position: relative;
-  padding: 1.5rem 0;
+  padding: 2rem 0;
 }
 
 .profile-name-block::before,
@@ -90,21 +97,82 @@
   margin: 0;
   font-family: 'KH Interference', sans-serif;
   font-weight: 700;
-  font-size: 12cqw;
+  font-size: clamp(4rem, 9vw, 9rem);
   line-height: 0.9;
   text-transform: uppercase;
   text-align: left;
-  white-space: nowrap;
+  overflow-wrap: break-word;
   color: #fff;
 }
 
 .profile-position {
-  margin: 1rem 0 0;
-  color: rgba(255, 255, 255, 0.7);
+  margin: 1.5rem 0 0;
+  font-size: clamp(1.25rem, 2.2vw, 1.75rem);
+  color: rgba(255, 255, 255, 0.75);
 }
 
-.profile-back {
+.profile-skill {
   display: inline-block;
-  margin-top: 2rem;
-  color: rgba(255, 255, 255, 0.75);
+  margin-top: 1.5rem;
+  padding: 0.35rem 0.9rem;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.05);
+  font-family: 'KH Interference', sans-serif;
+  font-weight: 400;
+  font-size: 1.25rem;
+}
+
+.profile-tools {
+  display: flex;
+  gap: 1rem;
+  margin: 2rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.profile-tool {
+  position: relative;
+  width: 64px;
+  height: 64px;
+}
+
+.profile-tool-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.profile-tool-award {
+  position: absolute;
+  right: -8px;
+  bottom: -8px;
+  color: #fff;
+}
+
+.profile-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  margin: 3rem 0 0;
+  padding-top: 2rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.profile-stat {
+  display: flex;
+  flex-direction: column;
+}
+
+.profile-stat dd {
+  margin: 0;
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  font-weight: 600;
+}
+
+.profile-stat dt {
+  order: 2;
+  margin-top: 0.5rem;
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.6);
 }

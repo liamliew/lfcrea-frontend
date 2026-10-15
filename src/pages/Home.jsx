@@ -64,10 +64,8 @@ export default function Home() {
         </div>
       </div>
       <div className="home-lower">
-        <div className="home-upper-lines">
-          <AboutUs />
-          <PhotographySection />
-        </div>
+        <AboutUs />
+        <PhotographySection />
         <InstagramCarousel />
         <TestimonialsSection />
         <TeamSection />

@@ -194,3 +194,9 @@
 .testimonials-container::after {
   right: 0;
 }
+
+@media (max-width: 768px) {
+  .spotlight-card.testimonial-card {
+    max-width: 320px;
+  }
+}

@@ -1,7 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { Home, User } from 'lucide-react';
 import { gsap } from 'gsap';
 import { getNavItems } from '../../services/navService';
+import { SERVICES } from '../../data/servicesData';
 import './Navbar.css';
 
 function IconInstagram() {
@@ -59,6 +61,21 @@ function SocialLink({ item }) {
   );
 }
 
+function WhatsAppPill() {
+  return (
+    <a
+      href="https://wa.me/601166767883"
+      target="_blank"
+      rel="noopener noreferrer"
+      className="navbar-wa-pill"
+      aria-label="Contact us on WhatsApp"
+    >
+      <IconWhatsApp />
+      <span>+6011 6676 7883</span>
+    </a>
+  );
+}
+
 function WhatsAppContact() {
   return (
     <a
@@ -71,6 +88,100 @@ function WhatsAppContact() {
       <IconWhatsApp />
       <span>+6011 6676 7883</span>
     </a>
+  );
+}
+
+function ServicesMenu() {
+  const { pathname } = useLocation();
+  const [openPath, setOpenPath] = useState(null);
+  const open = openPath === pathname;
+  const setOpen = (next) => {
+    const value = typeof next === 'function' ? next(open) : next;
+    setOpenPath(value ? pathname : null);
+  };
+  const rootRef = useRef(null);
+  const pointerRef = useRef('mouse');
+
+  useEffect(() => {
+    if (!open) return undefined;
+    const onDown = (e) => {
+      if (!rootRef.current?.contains(e.target)) setOpenPath(null);
+    };
+    const onKey = (e) => {
+      if (e.key === 'Escape') setOpenPath(null);
+    };
+    document.addEventListener('pointerdown', onDown);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('pointerdown', onDown);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [open]);
+
+  const onEnter = (e) => {
+    pointerRef.current = e.pointerType;
+    if (e.pointerType === 'mouse') setOpen(true);
+  };
+
+  const onLeave = (e) => {
+    if (e.pointerType === 'mouse') setOpen(false);
+  };
+
+  const onClick = () => {
+    if (pointerRef.current === 'mouse') setOpen(true);
+    else setOpen((o) => !o);
+  };
+
+  return (
+    <div
+      ref={rootRef}
+      className="navbar-services"
+      onPointerEnter={onEnter}
+      onPointerLeave={onLeave}
+    >
+      <button
+        type="button"
+        className="navbar-nav-link navbar-services-trigger"
+        aria-haspopup="true"
+        aria-expanded={open}
+        onClick={onClick}
+      >
+        Services
+      </button>
+      <ul className={`navbar-services-menu${open ? ' is-open' : ''}`} role="list">
+        {SERVICES.map((service) => (
+          <li key={service.slug}>
+            <Link className="navbar-services-link" to={`/services/${service.slug}`}>
+              {service.label}
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+const isHomeItem = (item) => item.label.toLowerCase() === 'home';
+
+function HomeButton() {
+  const { pathname } = useLocation();
+  if (pathname === '/') {
+    return (
+      <a
+        href="https://web.lfcrea.com"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="navbar-home"
+        aria-label="Open web.lfcrea.com"
+      >
+        <User size={16} strokeWidth={2} />
+      </a>
+    );
+  }
+  return (
+    <Link to="/" className="navbar-home" aria-label="Home">
+      <Home size={16} strokeWidth={2} />
+    </Link>
   );
 }
 
@@ -97,7 +208,7 @@ export default function Navbar() {
     if (!navItems.length && !socialItems.length) return;
 
     animatedRef.current = true;
-    const els = navRef.current.querySelectorAll('.navbar-nav-link, .navbar-social-link');
+    const els = navRef.current.querySelectorAll('.navbar-nav-link, .navbar-social-link, .navbar-home');
     if (!els.length) return;
 
     gsap.fromTo(
@@ -109,18 +220,21 @@ export default function Navbar() {
 
   if (isBooking) {
     const nonWaSocials = socialItems.filter(i => i.label.toLowerCase() !== 'whatsapp');
-    const pageLinks = navItems.filter(i => i.label !== 'Booking');
+    const pageLinks = navItems.filter(i => i.label !== 'Booking' && !isHomeItem(i));
     return (
+      <>
       <nav ref={navRef} className="navbar navbar--booking" aria-label="Main navigation">
         <div className="navbar-booking-left">
           <Link to="/" aria-label="Home">
             <img src="/lfcLogo.svg" alt="LF Creative" draggable={false} className="navbar-logo-img" />
           </Link>
+          <ServicesMenu />
           {pageLinks.map(item => (
             <Link key={item.label} className="navbar-nav-link" to={item.link}>
               {item.label}
             </Link>
           ))}
+          <HomeButton />
         </div>
 
         <WhatsAppContact />
@@ -131,10 +245,13 @@ export default function Navbar() {
           ))}
         </div>
       </nav>
+      <WhatsAppPill />
+      </>
     );
   }
 
   return (
+    <>
     <nav ref={navRef} className="navbar" aria-label="Main navigation">
       <div className="navbar-logo">
         <Link to="/" aria-label="Home">
@@ -143,7 +260,10 @@ export default function Navbar() {
       </div>
 
       <ul className="navbar-nav" role="list">
-        {navItems.map((item) => {
+        <li>
+          <ServicesMenu />
+        </li>
+        {navItems.filter((item) => !isHomeItem(item)).map((item) => {
           const isCta = item.label === 'Booking';
           const cls = isCta ? 'navbar-nav-link navbar-nav-cta' : 'navbar-nav-link';
           return (
@@ -160,6 +280,9 @@ export default function Navbar() {
             </li>
           );
         })}
+        <li className="navbar-home-item">
+          <HomeButton />
+        </li>
       </ul>
 
       <div className="navbar-socials">
@@ -172,5 +295,7 @@ export default function Navbar() {
         )}
       </div>
     </nav>
+    <WhatsAppPill />
+    </>
   );
 }

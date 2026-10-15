@@ -9,6 +9,7 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "upload:portfolio": "node --env-file=.env.local scripts/upload-portfolio.mjs",
+    "process:portfolio": "node --env-file=.env.local scripts/process-portfolio-r2.mjs",
     "upload:dome": "node --env-file=.env.local scripts/upload-dome.mjs"
   },
   "dependencies": {

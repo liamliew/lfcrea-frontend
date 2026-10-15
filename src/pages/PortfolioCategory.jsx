@@ -2,35 +2,59 @@ import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import Masonry from '../components/Masonry';
 import Lightbox from '../components/Lightbox';
+import BackToTop from '../components/BackToTop';
 import LatticeLoader from '../components/LatticeLoader';
-import { loadCategories, toMasonryItems } from '../services/portfolioAssets';
+import { loadCategories, loadWatermarks, streamMasonryItems, watermarkFor } from '../services/portfolioAssets';
 import './Portfolio.css';
+
+function shuffle(list) {
+  const out = [...list];
+  for (let i = out.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [out[i], out[j]] = [out[j], out[i]];
+  }
+  return out;
+}
 
 function CategoryView({ category }) {
   const [items, setItems] = useState([]);
   const [selected, setSelected] = useState(null);
+  const [watermarks, setWatermarks] = useState({});
   const [status, setStatus] = useState('loading');
   const [progress, setProgress] = useState({ done: 0, total: 0 });
 
   useEffect(() => {
+    loadWatermarks().then(setWatermarks).catch(() => {});
+  }, []);
+
+  useEffect(() => {
     let cancelled = false;
+    let stop = () => {};
     loadCategories()
       .then((categories) => {
-        const cat = categories.find((c) => c.slug === encodeURIComponent(category));
-        if (!cat) return null;
-        return toMasonryItems(
-          cat.images.map((img) => ({ id: img.file, thumb: img.thumb, full: img.full, original: img.original })),
-          (done, total) => { if (!cancelled) setProgress({ done, total }); }
-        );
-      })
-      .then((list) => {
         if (cancelled) return;
-        if (!list) return setStatus('missing');
-        setItems(list);
-        setStatus('ready');
+        const cat = categories.find((c) => c.slug === encodeURIComponent(category));
+        if (!cat) return setStatus('missing');
+        const entries = shuffle(cat.images).map((img) => ({
+          id: img.file,
+          thumb: img.thumb,
+          full: img.full,
+          original: img.original,
+        }));
+        stop = streamMasonryItems(entries, {
+          onProgress: (done, total) => setProgress({ done, total }),
+          onReady: (list) => {
+            setItems(list);
+            setStatus('ready');
+          },
+          onMore: (more) => setItems((prev) => [...prev, ...more]),
+        });
       })
       .catch(() => { if (!cancelled) setStatus('error'); });
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+      stop();
+    };
   }, [category]);
 
   return (
@@ -58,11 +82,14 @@ function CategoryView({ category }) {
           <Masonry items={items} animateFrom="bottom" stagger={0.12} onItemClick={setSelected} />
         </div>
       )}
+      <BackToTop />
       {selected && (
         <Lightbox
           preview={selected.url}
           original={selected.original}
           alt={`${category} ${selected.id}`}
+          fileName={selected.id}
+          watermark={watermarkFor(watermarks, selected.id)}
           onClose={() => setSelected(null)}
         />
       )}

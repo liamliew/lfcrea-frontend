@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
+import { Award } from 'lucide-react';
 import GradualBlur from '../components/GradualBlur';
 import Lanyard from '../components/Lanyard';
 import { useQualityTier } from '../lib/useQualityTier';
-import { MEMBERS } from '../data/teamData';
+import { MEMBERS, APP_ICONS } from '../data/teamData';
 import './Profile.css';
 
 const FACE_W = 1024;
@@ -84,14 +85,7 @@ async function buildFaces(handle) {
 
 export default function Profile() {
   const tier = useQualityTier();
-  const [faces, setFaces] = useState(null);
   const [isMobile, setIsMobile] = useState(() => window.matchMedia('(max-width: 899px)').matches);
-  const { slug } = useParams();
-  const member = MEMBERS.find((m) => m.slug === slug);
-
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [slug]);
 
   useEffect(() => {
     const query = window.matchMedia('(max-width: 899px)');
@@ -99,6 +93,9 @@ export default function Profile() {
     query.addEventListener('change', onChange);
     return () => query.removeEventListener('change', onChange);
   }, []);
+  const [faces, setFaces] = useState(null);
+  const { slug } = useParams();
+  const member = MEMBERS.find((m) => m.slug === slug);
 
   useEffect(() => {
     if (!member) return undefined;
@@ -113,7 +110,6 @@ export default function Profile() {
     return (
       <main className="profile-page profile-missing">
         <h1 className="profile-name">Not found</h1>
-        <Link to="/" className="profile-back">Back home</Link>
       </main>
     );
   }
@@ -134,11 +130,37 @@ export default function Profile() {
           )}
         </div>
         <div className="profile-info">
+          {member.certified && (
+            <div className="profile-cert">
+              <img src="/adobe.png" alt="" className="profile-cert-logo" />
+              <p className="profile-cert-text">CERTIFIED<br />PROFESSIONAL</p>
+            </div>
+          )}
           <div className="profile-name-block">
             <h1 className="profile-name">{member.name}</h1>
           </div>
           <p className="profile-position">{member.position}</p>
-          <Link to="/" className="profile-back">Back home</Link>
+          <span className="profile-skill">{member.skill}</span>
+          <ul className="profile-tools" aria-label="Adobe tools">
+            {member.tools.map((t) => (
+              <li key={t} className="profile-tool">
+                <img src={APP_ICONS[t]} alt={t} className="profile-tool-img" />
+                {member.certified?.includes(t) && (
+                  <Award className="profile-tool-award" size={20} aria-label="Adobe Certified Professional" />
+                )}
+              </li>
+            ))}
+          </ul>
+          <dl className="profile-stats">
+            <div className="profile-stat">
+              <dt>Years of experience</dt>
+              <dd>{member.years}</dd>
+            </div>
+            <div className="profile-stat">
+              <dt>Total projects</dt>
+              <dd>{member.projects}</dd>
+            </div>
+          </dl>
         </div>
       </div>
     </main>

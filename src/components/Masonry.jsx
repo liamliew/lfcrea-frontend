@@ -119,8 +119,8 @@ const Masonry = ({
 
   const gridHeight = grid.reduce((max, item) => Math.max(max, item.y + item.h), 0);
 
-  const positioned = useRef(false);
-  const entered = useRef(false);
+  const positionedIds = useRef(new Set());
+  const enteredIds = useRef(new Set());
 
   // Positions only; the entrance animates the inner image so resizes never interrupt it
   useLayoutEffect(() => {
@@ -130,21 +130,22 @@ const Masonry = ({
       const selector = `[data-key="${item.id}"]`;
       const props = { x: item.x, y: item.y, width: item.w, height: item.h };
 
-      if (!positioned.current) {
+      if (!positionedIds.current.has(item.id)) {
         gsap.set(selector, props);
+        positionedIds.current.add(item.id);
       } else {
         gsap.to(selector, { ...props, duration, ease, overwrite: 'auto' });
       }
     });
-
-    positioned.current = true;
   }, [grid, duration, ease]);
 
   useLayoutEffect(() => {
-    if (!imagesReady || !grid.length || entered.current) return;
-    entered.current = true;
+    if (!imagesReady || !grid.length) return;
+    const fresh = grid.filter(item => !enteredIds.current.has(item.id));
+    if (!fresh.length) return;
+    fresh.forEach(item => enteredIds.current.add(item.id));
 
-    grid.forEach((item, index) => {
+    fresh.forEach((item, index) => {
       const offset = getEntryOffset();
       gsap.fromTo(
         `[data-key="${item.id}"] .item-img`,
