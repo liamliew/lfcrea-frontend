@@ -1,33 +1,31 @@
-import { useEffect, useMemo, useRef, useCallback } from 'react';
+import { useEffect, useMemo, useRef, useCallback, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { useGesture } from '@use-gesture/react';
 import LatticeLoader from './LatticeLoader';
+import PixelTransition from './PixelTransition';
+import { useQualityTier } from '../lib/useQualityTier';
+import { loadCategories } from '../services/portfolioAssets';
 import './DomeGallery.css';
 
-const MEDIA_BASE = (import.meta.env.VITE_MEDIA_URL ?? '').replace(/\/$/, '');
+const POOL_SIZE = 24;
 
-// Bump to bypass stale CDN cache
-const TILE_VERSION = 2;
+function shuffled(list) {
+    const copy = [...list];
+    for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+    }
+    return copy;
+}
 
-const DOME_FILES = [
-    '20251115-IMG_9238-Enhanced-NR.jpg',
-    '20251115-IMG_9418.jpg',
-    '20251115-JAS_0950-Enhanced-NR.jpg',
-    '20251115-JAS_1059-Enhanced-NR.jpg',
-    '20251116-IMG_9177.jpg',
-    '20260213-IMG_0257.jpg',
-    '20260213-IMG_0492-2.jpg',
-    '20260213-IMG_0811.jpg',
-    '20260220-IMG_0012.jpg',
-    '20260220-IMG_0051.jpg',
-    '20260220-IMG_0057.jpg'
-];
-
-const DEFAULT_IMAGES = DOME_FILES.map(filename => ({
-    src: `${MEDIA_BASE}/domegalleryCollection/tiles/${filename.replace(/\.[^.]+$/, '')}.webp?v=${TILE_VERSION}`,
-    fullSrc: `${MEDIA_BASE}/domegalleryCollection/${filename}`,
-    alt: filename
-}));
+// Random portfolio photos, thumbs as tiles
+function loadPortfolioImages() {
+    return loadCategories().then(categories =>
+        shuffled(categories.flatMap(cat => cat.images))
+            .slice(0, POOL_SIZE)
+            .map(img => ({ src: img.thumb, fullSrc: img.original, alt: img.file }))
+    );
+}
 
 const originalCache = new Map();
 
@@ -103,6 +101,135 @@ const getDataNumber = (el, name, fallback) => {
     return Number.isFinite(n) ? n : fallback;
 };
 
+const normalizeImage = image =>
+    typeof image === 'string'
+        ? { src: image, fullSrc: image, alt: '' }
+        : { src: image.src || '', fullSrc: image.fullSrc || image.src || '', alt: image.alt || '' };
+
+const SWAP_MIN_MS = 15000;
+const SWAP_SPREAD_MS = 30000;
+const MAX_SWAPS = 4;
+let activeSwaps = 0;
+
+const tilePhoto = src => (
+    <img src={src || undefined} draggable={false} alt="" />
+);
+
+// One tile that swaps photos on its own timer
+function DomeTile({ item, pool, tier, onTileClick, onTilePointerUp }) {
+    const [slots, setSlots] = useState([item, item]);
+    const [showSecond, setShowSecond] = useState(false);
+    const live = useRef({ second: false, slots: [item, item] });
+    const current = showSecond ? slots[1] : slots[0];
+    const canSwap = pool.length > 1 && tier !== 'low' && !!item.src;
+
+    useEffect(() => {
+        if (!canSwap) return undefined;
+        const st = live.current;
+        let timer;
+        let swap;
+        let release;
+        let cancelled = false;
+        let counted = false;
+
+        const schedule = () => {
+            timer = setTimeout(step, SWAP_MIN_MS * Math.random() + SWAP_SPREAD_MS * Math.random());
+        };
+
+        const step = () => {
+            if (document.hidden) return schedule();
+            if (activeSwaps >= MAX_SWAPS) {
+                timer = setTimeout(step, 1000 + Math.random() * 2000);
+                return;
+            }
+            const shown = st.second ? st.slots[1] : st.slots[0];
+            const options = pool.filter(p => p.src !== shown.src);
+            const next = options[Math.floor(Math.random() * options.length)];
+            const probe = new Image();
+            probe.onload = probe.onerror = () => {
+                if (cancelled) return;
+                activeSwaps++;
+                counted = true;
+                st.slots = st.second ? [next, st.slots[1]] : [st.slots[0], next];
+                setSlots(st.slots);
+                swap = setTimeout(() => {
+                    if (cancelled) return;
+                    st.second = !st.second;
+                    setShowSecond(st.second);
+                    release = setTimeout(() => {
+                        if (counted) activeSwaps--;
+                        counted = false;
+                    }, 1100);
+                    schedule();
+                }, 60);
+            };
+            probe.src = next.src;
+        };
+
+        schedule();
+        return () => {
+            cancelled = true;
+            clearTimeout(timer);
+            clearTimeout(swap);
+            clearTimeout(release);
+            if (counted) activeSwaps--;
+        };
+    }, [canSwap, pool]);
+
+    return (
+        <div
+            className="item"
+            data-src={current.fullSrc}
+            data-offset-x={item.x}
+            data-offset-y={item.y}
+            data-size-x={item.sizeX}
+            data-size-y={item.sizeY}
+            style={{
+                ['--offset-x']: item.x,
+                ['--offset-y']: item.y,
+                ['--item-size-x']: item.sizeX,
+                ['--item-size-y']: item.sizeY
+            }}
+        >
+            <div
+                className="item__image"
+                role="button"
+                tabIndex={0}
+                aria-label={current.alt || 'Open image'}
+                data-thumb={current.src}
+                onClick={onTileClick}
+                onPointerUp={onTilePointerUp}
+                onKeyDown={e => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        onTileClick(e);
+                    }
+                }}
+            >
+                {canSwap ? (
+                    <div className="item__swap" inert>
+                        <PixelTransition
+                            firstContent={tilePhoto(slots[0].src)}
+                            secondContent={tilePhoto(slots[1].src)}
+                            active={showSecond}
+                            trigger="click"
+                            pixelColor="#ffffff"
+                            gridSize={6}
+                            pattern="random"
+                            pixelAnimation="pop"
+                            animationStepDuration={0.5}
+                            aspectRatio="auto"
+                            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', borderRadius: 0 }}
+                        />
+                    </div>
+                ) : (
+                    tilePhoto(item.src)
+                )}
+            </div>
+        </div>
+    );
+}
+
 function buildItems(pool, seg) {
     const xCols = Array.from({ length: seg }, (_, i) => -37 + i * 2);
     const evenYs = [-4, -2, 0, 2, 4];
@@ -123,16 +250,7 @@ function buildItems(pool, seg) {
         );
     }
 
-    const normalizedImages = pool.map(image => {
-        if (typeof image === 'string') {
-            return { src: image, fullSrc: image, alt: '' };
-        }
-        return { 
-            src: image.src || '', 
-            fullSrc: image.fullSrc || image.src || '', 
-            alt: image.alt || '' 
-        };
-    });
+    const normalizedImages = pool.map(normalizeImage);
 
     const usedImages = Array.from({ length: totalSlots }, (_, i) => normalizedImages[i % normalizedImages.length]);
 
@@ -165,7 +283,7 @@ function computeItemBaseRotation(offsetX, offsetY, sizeX, sizeY, segments) {
 }
 
 export default function DomeGallery({
-                                        images = DEFAULT_IMAGES,
+                                        images: imagesProp,
                                         fit = 0.5,
                                         fitBasis = 'auto',
                                         minRadius = 600,
@@ -217,7 +335,21 @@ export default function DomeGallery({
         document.body.classList.remove('dg-scroll-lock');
     }, []);
 
+    const [portfolioImages, setPortfolioImages] = useState([]);
+
+    useEffect(() => {
+        if (imagesProp) return undefined;
+        let cancelled = false;
+        loadPortfolioImages()
+            .then(list => { if (!cancelled) setPortfolioImages(list); })
+            .catch(() => {});
+        return () => { cancelled = true; };
+    }, [imagesProp]);
+
+    const images = imagesProp ?? portfolioImages;
     const items = useMemo(() => buildItems(images, segments), [images, segments]);
+    const pool = useMemo(() => images.map(normalizeImage), [images]);
+    const tier = useQualityTier();
 
     const applyTransform = (xDeg, yDeg) => {
         const el = sphereRef.current;
@@ -589,9 +721,9 @@ export default function DomeGallery({
             overlay.style.willChange = 'transform, opacity';
             overlay.style.transformOrigin = 'top left';
             overlay.style.transition = `transform ${enlargeTransitionMs}ms ease, opacity ${enlargeTransitionMs}ms ease`;
-            const rawSrc = parent.dataset.src || el.querySelector('img')?.src || '';
+            const rawSrc = parent.dataset.src || el.dataset.thumb || '';
             const img = document.createElement('img');
-            img.src = el.querySelector('img')?.src || rawSrc;
+            img.src = el.dataset.thumb || el.querySelector('img')?.src || rawSrc;
             overlay.appendChild(img);
             viewerRef.current.appendChild(overlay);
             if (rawSrc) loadOriginalWithProgress(overlay, img, rawSrc);
@@ -696,38 +828,14 @@ export default function DomeGallery({
                 <div className="stage">
                     <div ref={sphereRef} className="sphere">
                         {items.map((it, i) => (
-                            <div
-                                key={`${it.x},${it.y},${i}`}
-                                className="item"
-                                data-src={it.fullSrc}
-                                data-offset-x={it.x}
-                                data-offset-y={it.y}
-                                data-size-x={it.sizeX}
-                                data-size-y={it.sizeY}
-                                style={{
-                                    ['--offset-x']: it.x,
-                                    ['--offset-y']: it.y,
-                                    ['--item-size-x']: it.sizeX,
-                                    ['--item-size-y']: it.sizeY
-                                }}
-                            >
-                                <div
-                                    className="item__image"
-                                    role="button"
-                                    tabIndex={0}
-                                    aria-label={it.alt || 'Open image'}
-                                    onClick={onTileClick}
-                                    onPointerUp={onTilePointerUp}
-                                    onKeyDown={e => {
-                                        if (e.key === 'Enter' || e.key === ' ') {
-                                            e.preventDefault();
-                                            onTileClick(e);
-                                        }
-                                    }}
-                                >
-                                    <img src={it.src} draggable={false} alt={it.alt} />
-                                </div>
-                            </div>
+                            <DomeTile
+                                key={`${it.x},${it.y},${i},${it.src}`}
+                                item={it}
+                                pool={pool}
+                                tier={tier}
+                                onTileClick={onTileClick}
+                                onTilePointerUp={onTilePointerUp}
+                            />
                         ))}
                     </div>
                 </div>

@@ -8,5 +8,5 @@ export const SERVICES = [
     body: 'Our videographer is young but is backed with years of experience and projects. Having worked with large companies like RTM, Caltex, he is prepared for any project you have for him.',
   },
   { slug: 'marketing', label: 'Marketing' },
-  { slug: 'webdesign', label: 'Webdesign' },
+  { slug: 'webdesign', label: 'Webdesign', heading: 'WEBDESIGN', mobileHeading: 'WEBDEV', tech: true },
 ];

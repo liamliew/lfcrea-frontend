@@ -2,8 +2,8 @@ import './FAQSimple.css';
 
 const faqs = [
     {
-        question: "Can I pay you in exposure?",
-        answer: "Did you just lowball us? No, you cannot pay us in exposure. If you are looking to try our service before you book, we offer trial rates of RM15/hour. Contact us for more info.",
+        question: "Can cheaper ah?",
+        answer: "No. Our prices are as affordable as it can be. If you think it's too expensive, drop us a message, you might just be looking at the wrong package.",
     },
     {
         question: "Do you offer discounts?",
@@ -22,8 +22,8 @@ const faqs = [
         answer: "Before we start working, we require that you pay half of the total price of the service, as a security deposit. We charge the other half at the end of the service.",
     },
     {
-        question: "How can I trust your quality of service?",
-        answer: "We offer trial rates at RM15/hour. Contact us for more info.",
+        question: "Can you shoot X event for free?",
+        answer: "No, we can't. LF Creative has grown to a reasonable size where our time is scarce and valuable. If you need our services, you will have to pay for our valuable time.",
     },
 ];
 
@@ -32,7 +32,7 @@ export default function FAQSimple() {
         <section className="faq-section">
             <div className="faq-container">
                 <div className="faq-header">
-                    <h2 className="faq-title">Frequently asked questions</h2>
+                    <h2 className="faq-title">FAQ</h2>
                     <p className="faq-subtitle">Everything you need to know about our services and our guarantee.</p>
                 </div>
 
@@ -69,7 +69,14 @@ export default function FAQSimple() {
                         <h4 className="faq-contact-title">Still have questions?</h4>
                         <p className="faq-contact-subtitle">Can't find the answer you're looking for? Please chat to our friendly team.</p>
                     </div>
-                    <button className="faq-button">Get in touch</button>
+                    <a
+                        className="faq-button"
+                        href="https://wa.me/601166767883"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        Get in touch
+                    </a>
                 </div>
             </div>
         </section>

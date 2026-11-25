@@ -4,6 +4,12 @@
     height: 100%;
     --radius: 520px;
     --viewer-pad: 72px;
+    --segments-x: 35;
+    --segments-y: 35;
+    --overlay-blur-color: #060010;
+    --tile-radius: 30px;
+    --enlarge-radius: 30px;
+    --image-filter: grayscale(1);
     --circ: calc(var(--radius) * 3.14);
     --rot-y: calc((360deg / var(--segments-x)) / 2);
     --rot-x: calc((360deg / var(--segments-y)) / 2);
@@ -76,6 +82,12 @@ main.sphere-main {
 }
 
 .item {
+    --offset-x: 0;
+    --offset-y: 0;
+    --item-size-x: 2;
+    --item-size-y: 2;
+    --rot-y-delta: 0deg;
+    --rot-x-delta: 0deg;
     width: calc(var(--item-width) * var(--item-size-x));
     height: calc(var(--item-height) * var(--item-size-y));
     position: absolute;
@@ -111,6 +123,11 @@ main.sphere-main {
 
 .item__image:focus {
     outline: none;
+}
+
+.item__swap {
+    position: absolute;
+    inset: 0;
 }
 
 .item__image img {
@@ -210,12 +227,12 @@ main.sphere-main {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 150px;
+  width: 120px;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 14px 0;
-  border-radius: 999px;
+  padding: 10px 0;
+  border-radius: 10px;
   background: rgba(0, 0, 0, 0.6);
   color: #fff;
   pointer-events: none;

@@ -39,7 +39,6 @@ export default function PortfolioGrid() {
   useEffect(() => {
     if (!activeCategory) return;
     let cancelled = false;
-    setLoading(true);
     getPortfolioItems(activeCategory).then(({ data, error }) => {
       if (cancelled) return;
       if (!error) setItems(data ?? []);
@@ -65,7 +64,10 @@ export default function PortfolioGrid() {
       <h2 className="portfolio-heading">Our Work</h2>
       <Tabs
         selectedKey={activeCategory}
-        onSelectionChange={(key) => setActiveCategory(key)}
+        onSelectionChange={(key) => {
+          setLoading(true);
+          setActiveCategory(key);
+        }}
         className="portfolio-tabs-container"
       >
         <TabList className="portfolio-tablist" aria-label="Portfolio categories">

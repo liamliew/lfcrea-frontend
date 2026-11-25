@@ -1,6 +1,7 @@
 .faq-section {
+  position: relative;
   background-color: black;
-  padding: 2rem 1rem;
+  padding: 80px 2rem;
   font-family: 'Figtree', sans-serif;
   color: white;
   display: flex;
@@ -9,16 +10,62 @@
   width: 100%;
 }
 
-@media (min-width: 768px) {
-  .faq-section {
-    padding: 3rem 2rem;
-  }
+.faq-section::before,
+.faq-section::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1px;
+  pointer-events: none;
+  background: linear-gradient(
+    to right,
+    transparent,
+    rgba(255, 255, 255, 0.25) 15%,
+    rgba(255, 255, 255, 0.25) 85%,
+    transparent
+  );
+}
+
+.faq-section::before {
+  top: 80px;
+}
+
+.faq-section::after {
+  bottom: 80px;
 }
 
 .faq-container {
   max-width: 1200px;
   width: 100%;
   margin: 0 auto;
+  padding: 40px 2.5rem;
+  position: relative;
+}
+
+.faq-container::before,
+.faq-container::after {
+  content: '';
+  position: absolute;
+  top: -40px;
+  bottom: -40px;
+  width: 1px;
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    rgba(255, 255, 255, 0.25) 40px,
+    rgba(255, 255, 255, 0.25) calc(100% - 40px),
+    transparent
+  );
+}
+
+.faq-container::before {
+  left: 0;
+}
+
+.faq-container::after {
+  right: 0;
 }
 
 .faq-header {
@@ -31,16 +78,14 @@
 }
 
 .faq-title {
-  font-size: 2.5rem;
-  font-weight: 600;
-  margin: 0;
+  font-family: 'KH Interference', sans-serif;
+  font-weight: 700;
+  font-size: clamp(3rem, 8vw, 6.5rem);
+  line-height: 0.9;
+  text-transform: uppercase;
+  text-align: center;
   color: white;
-}
-
-@media (min-width: 768px) {
-  .faq-title {
-    font-size: 3rem;
-  }
+  margin: 0 0 1.5rem;
 }
 
 .faq-subtitle {
@@ -121,9 +166,9 @@
   flex-direction: column;
   align-items: center;
   gap: 1.5rem;
-  border-radius: 1rem;
+  border-radius: 0;
   background-color: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.25);
   padding: 2rem 1.5rem;
   text-align: center;
 }
@@ -197,6 +242,7 @@
   border-radius: 0.5rem;
   border: none;
   cursor: pointer;
+  text-decoration: none;
   transition: transform 0.2s ease, opacity 0.2s ease;
 }
 

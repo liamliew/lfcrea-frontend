@@ -47,7 +47,6 @@ npm run dev
 | `npm run build` | Production build |
 | `npm run lint` | ESLint |
 | `npm run process:portfolio` | Generate thumb and full WebP variants for every original in R2 `portfolio/<category>/` and rewrite `portfolio/manifest.json` |
-| `npm run upload:dome` | Generate compressed dome tiles from the originals in R2 `domegalleryCollection/` |
 | `npm run upload:portfolio` | Older script that builds variants from a local `src/assets/portfolio` folder. Do not run it unless that folder is complete, because it overwrites the manifest. |
 
 All three image scripts skip files that already exist. Add `--force` to regenerate.
@@ -80,7 +79,7 @@ Portfolio photos are served from Cloudflare R2 through `VITE_MEDIA_URL`. The por
 
 ### Dome gallery
 
-The home page dome uses the originals in `domegalleryCollection/` for the enlarged view and small `tiles/` files (320px, quality 30) for the tiles. After uploading new originals, run `npm run upload:dome`, then add the filename to `DOME_FILES` in `src/components/DomeGallery.jsx`. Tile URLs carry a `?v=` query (`TILE_VERSION`) so a stale CDN cache can be bypassed by bumping it.
+The home page dome shows 24 random photos from the portfolio manifest, picked on each visit. Tiles use the portfolio `thumb/` files and the enlarged view loads the original.
 
 ### Instagram and other Supabase media
 

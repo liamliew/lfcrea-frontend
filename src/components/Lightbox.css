@@ -109,14 +109,14 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 150px;
+  width: 120px;
   display: flex;
   align-items: center;
   justify-content: center;
   color: #fff;
   background: rgba(0, 0, 0, 0.6);
-  padding: 14px 0;
-  border-radius: 999px;
+  padding: 10px 0;
+  border-radius: 10px;
 }
 
 @media (max-width: 768px) {
