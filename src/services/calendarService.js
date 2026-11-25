@@ -1,5 +1,3 @@
-import { supabase } from '../lib/supabase';
-
 export async function getBlockedHours(dateString) {
   const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/get-calendar-availability`;
   try {
