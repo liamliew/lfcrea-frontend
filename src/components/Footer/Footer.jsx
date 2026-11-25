@@ -5,7 +5,7 @@ import './Footer.css';
 const PAGES = [
   { label: 'Home', to: '/' },
   { label: 'Portfolio', to: '/portfolio' },
-  { label: 'Booking', to: '/booking' },
+  { label: 'Booking', href: 'https://wa.me/601166767883' },
 ];
 
 export default function Footer() {
@@ -24,8 +24,14 @@ export default function Footer() {
         <nav aria-label="Footer navigation">
           <ul className="site-footer-links">
             {PAGES.map((page) => (
-              <li key={page.to}>
-                <Link to={page.to} className="site-footer-link">{page.label}</Link>
+              <li key={page.label}>
+                {page.href ? (
+                  <a href={page.href} target="_blank" rel="noopener noreferrer" className="site-footer-link">
+                    {page.label}
+                  </a>
+                ) : (
+                  <Link to={page.to} className="site-footer-link">{page.label}</Link>
+                )}
               </li>
             ))}
           </ul>

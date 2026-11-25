@@ -61,6 +61,8 @@ function SocialLink({ item }) {
   );
 }
 
+const WHATSAPP_URL = 'https://wa.me/601166767883';
+
 function WhatsAppPill() {
   return (
     <a
@@ -266,14 +268,15 @@ export default function Navbar() {
         {navItems.filter((item) => !isHomeItem(item)).map((item) => {
           const isCta = item.label === 'Booking';
           const cls = isCta ? 'navbar-nav-link navbar-nav-cta' : 'navbar-nav-link';
+          const link = isCta ? WHATSAPP_URL : item.link;
           return (
             <li key={item.label}>
-              {item.link.startsWith('/') ? (
-                <Link className={cls} to={item.link} aria-label={item.ariaLabel}>
+              {link.startsWith('/') ? (
+                <Link className={cls} to={link} aria-label={item.ariaLabel}>
                   {item.label}
                 </Link>
               ) : (
-                <a className={cls} href={item.link} target="_blank" rel="noopener noreferrer" aria-label={item.ariaLabel}>
+                <a className={cls} href={link} target="_blank" rel="noopener noreferrer" aria-label={item.ariaLabel}>
                   {item.label}
                 </a>
               )}

@@ -53,7 +53,7 @@ export default function Home() {
           </p>
           <div className="hero-buttons">
             <a
-              href="https://lfcrea.setmore.com"
+              href="https://wa.me/601166767883"
               target="_blank"
               rel="noopener noreferrer"
               className="hero-btn hero-btn-primary"
